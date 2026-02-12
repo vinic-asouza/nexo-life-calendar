@@ -1,0 +1,53 @@
+export interface Area {
+  id: string;
+  name: string;
+  color: string; // HSL string like "37 92% 60%"
+}
+
+export interface ItemType {
+  id: string;
+  name: string;
+}
+
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays' | 'custom';
+
+export interface Recurrence {
+  type: RecurrenceType;
+  customDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
+}
+
+export interface CalendarItem {
+  id: string;
+  title: string;
+  startDate: string; // ISO date string
+  endDate?: string; // ISO date string for multi-day items
+  areaId: string;
+  typeId: string;
+  recurrence?: Recurrence;
+  notes?: string;
+  status: 'pending' | 'done';
+  createdAt: string;
+}
+
+export type ViewMode = 'day' | 'week' | 'month';
+
+export interface FilterState {
+  areaIds: string[];
+  typeIds: string[];
+}
+
+// Default areas
+export const DEFAULT_AREAS: Area[] = [
+  { id: 'area-personal', name: 'Pessoal', color: '217 91% 60%' },
+  { id: 'area-work', name: 'Profissional', color: '37 92% 60%' },
+  { id: 'area-health', name: 'Saúde', color: '142 71% 45%' },
+  { id: 'area-family', name: 'Família', color: '340 82% 52%' },
+];
+
+// Default types
+export const DEFAULT_TYPES: ItemType[] = [
+  { id: 'type-event', name: 'Evento' },
+  { id: 'type-task', name: 'Tarefa' },
+  { id: 'type-habit', name: 'Hábito' },
+  { id: 'type-reminder', name: 'Lembrete' },
+];
