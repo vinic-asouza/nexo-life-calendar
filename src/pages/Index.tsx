@@ -1,12 +1,144 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from 'react';
+import { CalendarItem, FilterState } from '@/types';
+import { Header } from '@/components/Header';
+import { AppSidebar } from '@/components/AppSidebar';
+import { DayView } from '@/components/DayView';
+import { WeekView } from '@/components/WeekView';
+import { MonthView } from '@/components/MonthView';
+import { ItemModal } from '@/components/ItemModal';
+import { useItems } from '@/hooks/useItems';
+import { useAreas } from '@/hooks/useAreas';
+import { useTypes } from '@/hooks/useTypes';
+import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 
 const Index = () => {
+  const { items, addItem, updateItem, deleteItem, toggleStatus } = useItems();
+  const { areas, addArea, updateArea, deleteArea } = useAreas();
+  const { types, addType, updateType, deleteType } = useTypes();
+  const { currentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({ areaIds: [], typeIds: [] });
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit'>('create');
+  const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
+  const [initialDate, setInitialDate] = useState<string | undefined>();
+
+  const toggleAreaFilter = useCallback((id: string) => {
+    setFilters(prev => ({
+      ...prev,
+      areaIds: prev.areaIds.includes(id)
+        ? prev.areaIds.filter(x => x !== id)
+        : [...prev.areaIds, id],
+    }));
+  }, []);
+
+  const toggleTypeFilter = useCallback((id: string) => {
+    setFilters(prev => ({
+      ...prev,
+      typeIds: prev.typeIds.includes(id)
+        ? prev.typeIds.filter(x => x !== id)
+        : [...prev.typeIds, id],
+    }));
+  }, []);
+
+  const handleAddItem = useCallback((date?: string) => {
+    setSelectedItem(null);
+    setInitialDate(date);
+    setModalMode('create');
+    setModalOpen(true);
+  }, []);
+
+  const handleItemClick = useCallback((item: CalendarItem) => {
+    setSelectedItem(item);
+    setModalMode('view');
+    setModalOpen(true);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <Header
+        currentDate={currentDate}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onPrev={goPrev}
+        onNext={goNext}
+        onToday={goToday}
+        onAddItem={() => handleAddItem()}
+        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+      />
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Mobile: controlled by sidebarOpen, Desktop: always visible via CSS */}
+        <AppSidebar
+          areas={areas}
+          types={types}
+          filters={filters}
+          onToggleAreaFilter={toggleAreaFilter}
+          onToggleTypeFilter={toggleTypeFilter}
+          onAddArea={addArea}
+          onUpdateArea={updateArea}
+          onDeleteArea={deleteArea}
+          onAddType={addType}
+          onUpdateType={updateType}
+          onDeleteType={deleteType}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        <main className="flex-1 overflow-y-auto">
+          {viewMode === 'day' && (
+            <DayView
+              date={currentDate}
+              items={items}
+              areas={areas}
+              types={types}
+              filters={filters}
+              onItemClick={handleItemClick}
+              onAddItem={handleAddItem}
+              onToggleStatus={toggleStatus}
+            />
+          )}
+          {viewMode === 'week' && (
+            <WeekView
+              date={currentDate}
+              items={items}
+              areas={areas}
+              types={types}
+              filters={filters}
+              onItemClick={handleItemClick}
+              onAddItem={handleAddItem}
+              onToggleStatus={toggleStatus}
+            />
+          )}
+          {viewMode === 'month' && (
+            <MonthView
+              date={currentDate}
+              items={items}
+              areas={areas}
+              filters={filters}
+              onItemClick={handleItemClick}
+              onAddItem={handleAddItem}
+            />
+          )}
+        </main>
       </div>
+
+      <ItemModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        areas={areas}
+        types={types}
+        initialDate={initialDate}
+        item={selectedItem}
+        mode={modalMode}
+        onSave={addItem}
+        onUpdate={updateItem}
+        onDelete={deleteItem}
+        onToggleStatus={toggleStatus}
+      />
     </div>
   );
 };
