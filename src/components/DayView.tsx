@@ -74,16 +74,26 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                     key={item.id}
                     onClick={() => onItemClick(item)}
                     className={cn(
-                      'group flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors',
-                      isDone ? 'bg-muted/40 border-border/50' : 'bg-card border-border hover:bg-muted/30'
+                      'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                      isDone && 'opacity-60'
                     )}
+                    style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                    onMouseEnter={e => {
+                      if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
+                    }}
+                    onMouseLeave={e => {
+                      if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
+                    }}
                   >
                     <button
                       onClick={e => { e.stopPropagation(); onToggleStatus(item.id); }}
                       className={cn(
-                        'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
-                        isDone ? 'border-primary bg-primary' : 'border-muted-foreground/40 hover:border-primary'
+                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
+                        isDone
+                          ? 'border-transparent'
+                          : 'border-muted-foreground/40 hover:border-primary'
                       )}
+                      style={isDone && area ? { backgroundColor: `hsl(${area.color})`, borderColor: `hsl(${area.color})` } : undefined}
                     >
                       {isDone && <Check className="h-3 w-3 text-primary-foreground" />}
                     </button>
@@ -92,15 +102,12 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                       <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
                         {item.title}
                       </p>
-                      {item.notes && (
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{item.notes}</p>
-                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       {area && (
                         <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
-                          style={{ backgroundColor: `hsl(${area.color} / 0.12)`, color: `hsl(${area.color})` }}>
+                          style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
                           {area.name}
                         </span>
                       )}
