@@ -3,7 +3,9 @@ import { getItemsForDate } from '@/hooks/useItems';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plus, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 interface DayViewProps {
   date: Date;
@@ -19,6 +21,27 @@ interface DayViewProps {
 export function DayView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: DayViewProps) {
   const dayItems = getItemsForDate(items, date, filters);
 
+  // Group items by type
+  const groupedItems = useMemo(() => {
+    const groups: { type: ItemType | undefined; items: CalendarItem[] }[] = [];
+    const typeMap = new Map<string, CalendarItem[]>();
+
+    dayItems.forEach(item => {
+      const existing = typeMap.get(item.typeId);
+      if (existing) {
+        existing.push(item);
+      } else {
+        typeMap.set(item.typeId, [item]);
+      }
+    });
+
+    typeMap.forEach((items, typeId) => {
+      groups.push({ type: types.find(t => t.id === typeId), items });
+    });
+
+    return groups;
+  }, [dayItems, types]);
+
   return (
     <div className="flex-1 p-4 md:p-8">
       <div className="mb-6">
@@ -30,53 +53,58 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
         </h2>
       </div>
 
-      <div className="space-y-2">
-        {dayItems.map(item => {
-          const area = areas.find(a => a.id === item.areaId);
-          const type = types.find(t => t.id === item.typeId);
+      <div className="space-y-1">
+        {groupedItems.map(group => (
+          group.items.map(item => {
+            const area = areas.find(a => a.id === item.areaId);
+            const type = types.find(t => t.id === item.typeId);
+            const isDone = item.status === 'done';
 
-          return (
-            <div
-              key={item.id}
-              onClick={() => onItemClick(item)}
-              className="group flex cursor-pointer items-start gap-3 rounded-xl border bg-card p-4 transition-all hover:shadow-md hover:border-primary/20"
-            >
-              <button
-                onClick={e => { e.stopPropagation(); onToggleStatus(item.id); }}
+            return (
+              <div
+                key={item.id}
+                onClick={() => onItemClick(item)}
                 className={cn(
-                  'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-                  item.status === 'done' ? 'border-primary bg-primary' : 'border-muted-foreground/40 hover:border-primary'
+                  'group flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors',
+                  isDone ? 'bg-muted/40 border-border/50' : 'bg-card hover:bg-muted/50 border-border'
                 )}
               >
-                {item.status === 'done' && <Check className="h-3 w-3 text-primary-foreground" />}
-              </button>
+                <button
+                  onClick={e => { e.stopPropagation(); onToggleStatus(item.id); }}
+                  className={cn(
+                    'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
+                    isDone ? 'border-primary bg-primary' : 'border-muted-foreground/40 hover:border-primary'
+                  )}
+                >
+                  {isDone && <Check className="h-3 w-3 text-primary-foreground" />}
+                </button>
 
-              <div className="flex-1 min-w-0">
-                <p className={cn('font-medium text-sm', item.status === 'done' && 'line-through text-muted-foreground')}>
-                  {item.title}
-                </p>
-                {item.notes && (
-                  <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{item.notes}</p>
-                )}
-              </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
+                    {item.title}
+                  </p>
+                  {item.notes && (
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{item.notes}</p>
+                  )}
+                </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
-                {area && (
-                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                    style={{ backgroundColor: `hsl(${area.color} / 0.12)`, color: `hsl(${area.color})` }}>
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: `hsl(${area.color})` }} />
-                    {area.name}
-                  </span>
-                )}
-                {type && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                    {type.name}
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {area && (
+                    <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-medium"
+                      style={{ backgroundColor: `hsl(${area.color} / 0.12)`, color: `hsl(${area.color})` }}>
+                      {area.name}
+                    </span>
+                  )}
+                  {type && (
+                    <span className="rounded-lg bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                      {type.name}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ))}
 
         {dayItems.length === 0 && (
           <div className="py-16 text-center">
@@ -85,12 +113,15 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
         )}
       </div>
 
-      <button
-        onClick={() => onAddItem(format(date, 'yyyy-MM-dd'))}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-      >
-        <Plus className="h-4 w-4" /> Adicionar item
-      </button>
+      <div className="mt-4 flex justify-center">
+        <Button
+          onClick={() => onAddItem(format(date, 'yyyy-MM-dd'))}
+          size="sm"
+          className="gap-1.5"
+        >
+          <Plus className="h-3.5 w-3.5" /> Adicionar item
+        </Button>
+      </div>
     </div>
   );
 }

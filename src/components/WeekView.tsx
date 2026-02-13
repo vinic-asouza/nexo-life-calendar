@@ -2,9 +2,9 @@ import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate } from '@/hooks/useItems';
 import { format, startOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Check } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 interface WeekViewProps {
   date: Date;
@@ -19,29 +19,44 @@ interface WeekViewProps {
 
 export function WeekView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
-  const weekStart = startOfWeek(date, { weekStartsOn: 1 }); // Monday
+  const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 
-  // Mon-Fri individual, Sat+Sun share last column
-  const columns = [];
-  for (let i = 0; i < 5; i++) {
-    columns.push({ days: [addDays(weekStart, i)] });
-  }
-  columns.push({ days: [addDays(weekStart, 5), addDays(weekStart, 6)] }); // Sat + Sun
+  const columns = useMemo(() => {
+    const cols = [];
+    for (let i = 0; i < 5; i++) {
+      cols.push({ days: [addDays(weekStart, i)] });
+    }
+    cols.push({ days: [addDays(weekStart, 5), addDays(weekStart, 6)] });
+    return cols;
+  }, [weekStart.getTime()]);
+
+  const groupByType = (dayItems: CalendarItem[]) => {
+    const groups: { typeId: string; items: CalendarItem[] }[] = [];
+    const map = new Map<string, CalendarItem[]>();
+    dayItems.forEach(item => {
+      const arr = map.get(item.typeId) || [];
+      arr.push(item);
+      map.set(item.typeId, arr);
+    });
+    map.forEach((items, typeId) => groups.push({ typeId, items }));
+    return groups;
+  };
 
   return (
     <div className="flex-1 overflow-x-auto">
       <div className="grid min-w-[700px] grid-cols-6 gap-0 h-full">
         {columns.map((col, colIdx) => (
-          <div key={colIdx} className={cn('border-r last:border-r-0 flex flex-col', colIdx === 5 && 'divide-y')}>
+          <div key={colIdx} className={cn('border-r last:border-r-0 flex flex-col', colIdx === 5 && 'divide-y divide-border')}>
             {col.days.map((day, dayIdx) => {
               const dayItems = getItemsForDate(items, day, filters);
               const dayKey = colIdx * 10 + dayIdx;
               const today = isToday(day);
+              const grouped = groupByType(dayItems);
 
               return (
                 <div
                   key={dayIdx}
-                  className={cn('flex-1 p-2 md:p-3', col.days.length > 1 && 'min-h-[200px]')}
+                  className={cn('flex-1 p-2 md:p-3 min-h-0')}
                   onMouseEnter={() => setHoveredDay(dayKey)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
@@ -52,7 +67,7 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                       </p>
                       <p className={cn(
                         'text-lg font-semibold',
-                        today && 'flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm'
+                        today && 'flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm'
                       )}>
                         {format(day, 'd')}
                       </p>
@@ -60,37 +75,42 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                     {hoveredDay === dayKey && (
                       <button
                         onClick={() => onAddItem(format(day, 'yyyy-MM-dd'))}
-                        className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary transition-all hover:bg-primary hover:text-primary-foreground"
+                        className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                       >
                         <Plus className="h-3 w-3" />
                       </button>
                     )}
                   </div>
 
-                  <div className="space-y-1">
-                    {dayItems.map(item => {
-                      const area = areas.find(a => a.id === item.areaId);
-                      return (
-                        <div
-                          key={item.id}
-                          onClick={() => onItemClick(item)}
-                          className={cn(
-                            'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-all hover:shadow-sm',
-                            item.status === 'done' && 'opacity-50'
-                          )}
-                          style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            {area && (
-                              <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: `hsl(${area.color})` }} />
-                            )}
-                            <span className={cn('truncate font-medium', item.status === 'done' && 'line-through')}>
-                              {item.title}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="space-y-2">
+                    {grouped.map(group => (
+                      <div key={group.typeId} className="space-y-0.5">
+                        {group.items.map(item => {
+                          const area = areas.find(a => a.id === item.areaId);
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => onItemClick(item)}
+                              className={cn(
+                                'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
+                                item.status === 'done' && 'opacity-50'
+                              )}
+                              style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                              onMouseEnter={e => {
+                                if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.2)`;
+                              }}
+                              onMouseLeave={e => {
+                                if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
+                              }}
+                            >
+                              <span className={cn('truncate font-medium block', item.status === 'done' && 'line-through')}>
+                                {item.title}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               );

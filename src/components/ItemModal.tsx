@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, Edit2, Trash2 } from 'lucide-react';
 import { CalendarItem, Area, ItemType, RecurrenceType } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -110,7 +109,7 @@ export function ItemModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={onClose}>
       <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-md rounded-t-2xl bg-card p-6 shadow-xl sm:rounded-2xl animate-in slide-in-from-bottom-4 duration-300"
+        className="relative z-10 w-full max-w-md rounded-t-xl bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-6 shadow-xl sm:rounded-xl animate-in slide-in-from-bottom-4 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -118,16 +117,9 @@ export function ItemModal({
           <h2 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
             {mode === 'create' ? 'Novo Item' : mode === 'view' ? 'Detalhes' : 'Editar Item'}
           </h2>
-          <div className="flex items-center gap-2">
-            {isView && (
-              <Button variant="ghost" size="sm" onClick={() => setMode('edit')} className="text-xs">
-                Editar
-              </Button>
-            )}
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {isView && item ? (
@@ -143,20 +135,19 @@ export function ItemModal({
               >
                 {item.status === 'done' && <span className="text-xs text-primary-foreground">✓</span>}
               </button>
-              <h3 className={cn('text-xl font-medium', item.status === 'done' && 'line-through text-muted-foreground')}>
+              <h3 className="text-xl font-medium">
                 {item.title}
               </h3>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {area && (
-                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: `hsl(${area.color})` }} />
+                <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
                   {area.name}
                 </span>
               )}
               {type && (
-                <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                   {type.name}
                 </span>
               )}
@@ -174,8 +165,13 @@ export function ItemModal({
               </div>
             )}
 
-            <div className="flex gap-2 pt-2">
-              <Button variant="destructive" size="sm" onClick={() => { onDelete(item.id); onClose(); }} className="text-xs">
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" size="sm" onClick={() => setMode('edit')} className="text-xs gap-1.5">
+                <Edit2 className="h-3 w-3" />
+                Editar
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => { onDelete(item.id); onClose(); }} className="text-xs gap-1.5">
+                <Trash2 className="h-3 w-3" />
                 Excluir
               </Button>
             </div>
@@ -188,7 +184,7 @@ export function ItemModal({
               placeholder="O que você precisa organizar?"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="border-0 bg-transparent text-lg font-medium placeholder:text-muted-foreground/50 focus-visible:ring-0 px-0"
+              className="text-lg font-medium placeholder:text-muted-foreground/50"
             />
 
             <div className="grid grid-cols-2 gap-3">
@@ -202,7 +198,7 @@ export function ItemModal({
                   <SelectTrigger className="mt-1 h-9 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
                     {areas.map(a => (
                       <SelectItem key={a.id} value={a.id}>
                         <span className="flex items-center gap-2">
@@ -222,7 +218,7 @@ export function ItemModal({
                 <SelectTrigger className="mt-1 h-9 text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
                   {types.map(t => (
                     <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                   ))}
@@ -248,7 +244,7 @@ export function ItemModal({
                     <SelectTrigger className="mt-1 h-9 text-sm">
                       <SelectValue placeholder="Sem recorrência" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
                       <SelectItem value="none">Sem recorrência</SelectItem>
                       {Object.entries(RECURRENCE_LABELS).map(([k, v]) => (
                         <SelectItem key={k} value={k}>{v}</SelectItem>
@@ -265,7 +261,7 @@ export function ItemModal({
                         type="button"
                         onClick={() => setCustomDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
                         className={cn(
-                          'h-8 w-8 rounded-full text-xs font-medium transition-colors',
+                          'h-8 w-8 rounded-lg text-xs font-medium transition-colors',
                           customDays.includes(i) ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         )}
                       >

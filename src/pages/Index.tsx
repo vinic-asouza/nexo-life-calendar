@@ -18,9 +18,9 @@ const Index = () => {
   const { currentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ areaIds: [], typeIds: [] });
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit'>('create');
   const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
@@ -29,18 +29,14 @@ const Index = () => {
   const toggleAreaFilter = useCallback((id: string) => {
     setFilters(prev => ({
       ...prev,
-      areaIds: prev.areaIds.includes(id)
-        ? prev.areaIds.filter(x => x !== id)
-        : [...prev.areaIds, id],
+      areaIds: prev.areaIds.includes(id) ? prev.areaIds.filter(x => x !== id) : [...prev.areaIds, id],
     }));
   }, []);
 
   const toggleTypeFilter = useCallback((id: string) => {
     setFilters(prev => ({
       ...prev,
-      typeIds: prev.typeIds.includes(id)
-        ? prev.typeIds.filter(x => x !== id)
-        : [...prev.typeIds, id],
+      typeIds: prev.typeIds.includes(id) ? prev.typeIds.filter(x => x !== id) : [...prev.typeIds, id],
     }));
   }, []);
 
@@ -57,6 +53,15 @@ const Index = () => {
     setModalOpen(true);
   }, []);
 
+  const handleToggleSidebar = useCallback(() => {
+    // On mobile, toggle drawer
+    if (window.innerWidth < 768) {
+      setSidebarOpen(prev => !prev);
+    } else {
+      setSidebarCollapsed(prev => !prev);
+    }
+  }, []);
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <Header
@@ -67,11 +72,11 @@ const Index = () => {
         onNext={goNext}
         onToday={goToday}
         onAddItem={() => handleAddItem()}
-        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+        onToggleSidebar={handleToggleSidebar}
+        sidebarCollapsed={sidebarCollapsed}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Mobile: controlled by sidebarOpen, Desktop: always visible via CSS */}
         <AppSidebar
           areas={areas}
           types={types}
@@ -85,43 +90,19 @@ const Index = () => {
           onUpdateType={updateType}
           onDeleteType={deleteType}
           open={sidebarOpen}
+          collapsed={sidebarCollapsed}
           onClose={() => setSidebarOpen(false)}
         />
 
         <main className="flex-1 overflow-y-auto">
           {viewMode === 'day' && (
-            <DayView
-              date={currentDate}
-              items={items}
-              areas={areas}
-              types={types}
-              filters={filters}
-              onItemClick={handleItemClick}
-              onAddItem={handleAddItem}
-              onToggleStatus={toggleStatus}
-            />
+            <DayView date={currentDate} items={items} areas={areas} types={types} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'week' && (
-            <WeekView
-              date={currentDate}
-              items={items}
-              areas={areas}
-              types={types}
-              filters={filters}
-              onItemClick={handleItemClick}
-              onAddItem={handleAddItem}
-              onToggleStatus={toggleStatus}
-            />
+            <WeekView date={currentDate} items={items} areas={areas} types={types} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'month' && (
-            <MonthView
-              date={currentDate}
-              items={items}
-              areas={areas}
-              filters={filters}
-              onItemClick={handleItemClick}
-              onAddItem={handleAddItem}
-            />
+            <MonthView date={currentDate} items={items} areas={areas} types={types} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} />
           )}
         </main>
       </div>
