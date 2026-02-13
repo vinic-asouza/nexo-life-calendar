@@ -100,27 +100,30 @@ export function AppSidebar({
                     <Plus className="h-3 w-3" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent side="right" align="start" className="w-56 p-3 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
-                  <p className="text-xs font-semibold mb-2">Nova Área</p>
+                <PopoverContent side="right" align="start" className="w-60 p-4 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50 space-y-3">
+                  <p className="text-xs font-semibold">Nova Área</p>
                   <Input
                     placeholder="Nome da área"
                     value={newAreaName}
                     onChange={e => setNewAreaName(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleAddArea()}
-                    className="h-8 text-sm mb-2"
+                    className="h-8 text-sm"
                     autoFocus
                   />
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {PRESET_COLORS.map(c => (
-                      <button
-                        key={c}
-                        onClick={() => setNewAreaColor(c)}
-                        className={cn('h-5 w-5 rounded-full transition-transform', newAreaColor === c && 'ring-2 ring-offset-1 ring-offset-card ring-primary scale-110')}
-                        style={{ backgroundColor: `hsl(${c})` }}
-                      />
-                    ))}
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-1.5">Cor</p>
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_COLORS.map(c => (
+                        <button
+                          key={c}
+                          onClick={() => setNewAreaColor(c)}
+                          className={cn('h-6 w-6 rounded-full transition-transform', newAreaColor === c && 'ring-2 ring-offset-2 ring-offset-card ring-primary scale-110')}
+                          style={{ backgroundColor: `hsl(${c})` }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <Button size="sm" onClick={handleAddArea} className="w-full h-7 text-xs" disabled={!newAreaName.trim()}>Criar</Button>
+                  <Button size="sm" onClick={handleAddArea} className="w-full h-8 text-xs" disabled={!newAreaName.trim()}>Criar Área</Button>
                 </PopoverContent>
               </Popover>
             </div>
@@ -173,17 +176,17 @@ export function AppSidebar({
                     <Plus className="h-3 w-3" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent side="right" align="start" className="w-56 p-3 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
-                  <p className="text-xs font-semibold mb-2">Novo Tipo</p>
+                <PopoverContent side="right" align="start" className="w-60 p-4 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50 space-y-3">
+                  <p className="text-xs font-semibold">Novo Tipo</p>
                   <Input
                     placeholder="Nome do tipo"
                     value={newTypeName}
                     onChange={e => setNewTypeName(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleAddType()}
-                    className="h-8 text-sm mb-2"
+                    className="h-8 text-sm"
                     autoFocus
                   />
-                  <Button size="sm" onClick={handleAddType} className="w-full h-7 text-xs" disabled={!newTypeName.trim()}>Criar</Button>
+                  <Button size="sm" onClick={handleAddType} className="w-full h-8 text-xs" disabled={!newTypeName.trim()}>Criar Tipo</Button>
                 </PopoverContent>
               </Popover>
             </div>

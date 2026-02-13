@@ -170,7 +170,7 @@ export function ItemModal({
                 <Edit2 className="h-3 w-3" />
                 Editar
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => { onDelete(item.id); onClose(); }} className="text-xs gap-1.5">
+              <Button size="sm" onClick={() => { onDelete(item.id); onClose(); }} className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
                 <Trash2 className="h-3 w-3" />
                 Excluir
               </Button>

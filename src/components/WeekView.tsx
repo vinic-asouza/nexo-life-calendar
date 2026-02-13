@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 interface WeekViewProps {
   date: Date;
@@ -31,20 +32,23 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
   }, [weekStart.getTime()]);
 
   const groupByType = (dayItems: CalendarItem[]) => {
-    const groups: { typeId: string; items: CalendarItem[] }[] = [];
+    const groups: { typeId: string; typeName: string; items: CalendarItem[] }[] = [];
     const map = new Map<string, CalendarItem[]>();
     dayItems.forEach(item => {
       const arr = map.get(item.typeId) || [];
       arr.push(item);
       map.set(item.typeId, arr);
     });
-    map.forEach((items, typeId) => groups.push({ typeId, items }));
+    map.forEach((items, typeId) => {
+      const type = types.find(t => t.id === typeId);
+      groups.push({ typeId, typeName: type?.name || 'Sem tipo', items });
+    });
     return groups;
   };
 
   return (
-    <div className="flex-1 overflow-x-auto">
-      <div className="grid min-w-[700px] grid-cols-6 gap-0 h-full">
+    <div className="flex-1 flex flex-col overflow-x-auto">
+      <div className="grid min-w-[700px] grid-cols-6 gap-0 flex-1">
         {columns.map((col, colIdx) => (
           <div key={colIdx} className={cn('border-r last:border-r-0 flex flex-col', colIdx === 5 && 'divide-y divide-border')}>
             {col.days.map((day, dayIdx) => {
@@ -56,7 +60,7 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
               return (
                 <div
                   key={dayIdx}
-                  className={cn('flex-1 p-2 md:p-3 min-h-0')}
+                  className={cn('flex-1 p-2 md:p-3 min-h-0 flex flex-col')}
                   onMouseEnter={() => setHoveredDay(dayKey)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
@@ -82,33 +86,41 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="flex-1 space-y-3">
                     {grouped.map(group => (
-                      <div key={group.typeId} className="space-y-0.5">
-                        {group.items.map(item => {
-                          const area = areas.find(a => a.id === item.areaId);
-                          return (
-                            <div
-                              key={item.id}
-                              onClick={() => onItemClick(item)}
-                              className={cn(
-                                'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
-                                item.status === 'done' && 'opacity-50'
-                              )}
-                              style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                              onMouseEnter={e => {
-                                if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.2)`;
-                              }}
-                              onMouseLeave={e => {
-                                if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
-                              }}
-                            >
-                              <span className={cn('truncate font-medium block', item.status === 'done' && 'line-through')}>
-                                {item.title}
-                              </span>
-                            </div>
-                          );
-                        })}
+                      <div key={group.typeId}>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                            {group.typeName}
+                          </span>
+                          <Separator className="flex-1" />
+                        </div>
+                        <div className="space-y-0.5">
+                          {group.items.map(item => {
+                            const area = areas.find(a => a.id === item.areaId);
+                            return (
+                              <div
+                                key={item.id}
+                                onClick={() => onItemClick(item)}
+                                className={cn(
+                                  'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
+                                  item.status === 'done' && 'opacity-50'
+                                )}
+                                style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                                onMouseEnter={e => {
+                                  if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
+                                }}
+                                onMouseLeave={e => {
+                                  if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
+                                }}
+                              >
+                                <span className={cn('truncate font-medium block', item.status === 'done' && 'line-through')}>
+                                  {item.title}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     ))}
                   </div>

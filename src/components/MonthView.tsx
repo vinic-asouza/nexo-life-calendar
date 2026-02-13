@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate } from '@/hooks/useItems';
 import {
@@ -9,6 +9,12 @@ import { ptBR } from 'date-fns/locale';
 import { Plus, Eye, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
+
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
 
 interface MonthViewProps {
   date: Date;
@@ -21,7 +27,6 @@ interface MonthViewProps {
 }
 
 export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem }: MonthViewProps) {
-  const [hoveredDay, setHoveredDay] = useState<string | null>(null);
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
 
   const monthStart = startOfMonth(date);
@@ -32,7 +37,22 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
 
   const WEEKDAY_LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
-  const viewDayItems = viewDayModal ? getItemsForDate(items, new Date(viewDayModal), filters) : [];
+  const viewDayItems = viewDayModal ? getItemsForDate(items, parseLocalDate(viewDayModal), filters) : [];
+
+  const viewDayGrouped = useMemo(() => {
+    if (!viewDayModal) return [];
+    const groups: { type: ItemType | undefined; items: CalendarItem[] }[] = [];
+    const typeMap = new Map<string, CalendarItem[]>();
+    viewDayItems.forEach(item => {
+      const existing = typeMap.get(item.typeId);
+      if (existing) existing.push(item);
+      else typeMap.set(item.typeId, [item]);
+    });
+    typeMap.forEach((items, typeId) => {
+      groups.push({ type: types.find(t => t.id === typeId), items });
+    });
+    return groups;
+  }, [viewDayItems, types, viewDayModal]);
 
   return (
     <div className="flex-1 p-2 md:p-4">
@@ -54,11 +74,9 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
             <div
               key={key}
               className={cn(
-                'relative min-h-[120px] bg-card p-1.5 md:p-2 transition-colors',
+                'relative min-h-[120px] bg-card p-1.5 md:p-2',
                 !inMonth && 'bg-muted/30'
               )}
-              onMouseEnter={() => setHoveredDay(key)}
-              onMouseLeave={() => setHoveredDay(null)}
             >
               <div className="flex items-center justify-between">
                 <span className={cn(
@@ -68,17 +86,17 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                 )}>
                   {format(day, 'd')}
                 </span>
-                {hoveredDay === key && inMonth && (
+                {inMonth && (
                   <div className="flex items-center gap-0.5">
                     <button
                       onClick={() => setViewDayModal(key)}
-                      className="flex h-5 w-5 items-center justify-center rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
+                      className="flex h-5 w-5 items-center justify-center rounded-lg text-muted-foreground/50 hover:bg-muted hover:text-foreground transition-colors"
                     >
                       <Eye className="h-3 w-3" />
                     </button>
                     <button
                       onClick={() => onAddItem(key)}
-                      className="flex h-5 w-5 items-center justify-center rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                      className="flex h-5 w-5 items-center justify-center rounded-lg text-muted-foreground/50 hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       <Plus className="h-3 w-3" />
                     </button>
@@ -94,12 +112,11 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                       key={item.id}
                       onClick={() => onItemClick(item)}
                       className={cn(
-                        'cursor-pointer truncate rounded-lg px-1.5 py-0.5 text-[10px] font-medium transition-colors',
+                        'cursor-pointer truncate rounded-lg px-1.5 py-0.5 text-[11px] font-medium text-foreground transition-colors hover:opacity-80',
                         item.status === 'done' && 'opacity-50'
                       )}
                       style={{
                         backgroundColor: area ? `hsl(${area.color} / 0.15)` : 'hsl(var(--muted))',
-                        color: area ? `hsl(${area.color})` : undefined,
                       }}
                     >
                       {item.title}
@@ -124,37 +141,48 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-sm capitalize" style={{ fontFamily: 'var(--font-display)' }}>
-                {format(new Date(viewDayModal), "EEEE, d 'de' MMMM", { locale: ptBR })}
+              <h3 className="font-semibold text-base capitalize" style={{ fontFamily: 'var(--font-display)' }}>
+                {format(parseLocalDate(viewDayModal), "EEEE, d 'de' MMMM", { locale: ptBR })}
               </h3>
               <button onClick={() => setViewDayModal(null)} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="space-y-1 max-h-[50vh] overflow-y-auto">
-              {viewDayItems.length === 0 && (
+            <div className="space-y-4 max-h-[50vh] overflow-y-auto">
+              {viewDayGrouped.length === 0 && (
                 <p className="text-sm text-muted-foreground py-4 text-center">Nenhum item neste dia</p>
               )}
-              {viewDayItems.map(item => {
-                const area = areas.find(a => a.id === item.areaId);
-                const type = types.find(t => t.id === item.typeId);
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => { setViewDayModal(null); onItemClick(item); }}
-                    className="flex items-center gap-2 rounded-lg p-2 cursor-pointer hover:bg-muted/50 transition-colors"
-                  >
-                    <span className="flex-1 text-sm font-medium truncate">{item.title}</span>
-                    {area && (
-                      <span className="rounded-lg px-2 py-0.5 text-[10px] font-medium"
-                        style={{ backgroundColor: `hsl(${area.color} / 0.12)`, color: `hsl(${area.color})` }}>
-                        {area.name}
-                      </span>
-                    )}
+              {viewDayGrouped.map(group => (
+                <div key={group.type?.id || 'unknown'}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {group.type?.name || 'Sem tipo'}
+                    </span>
+                    <Separator className="flex-1" />
                   </div>
-                );
-              })}
+                  <div className="space-y-1">
+                    {group.items.map(item => {
+                      const area = areas.find(a => a.id === item.areaId);
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => { setViewDayModal(null); onItemClick(item); }}
+                          className="flex items-center gap-2 rounded-lg p-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                          <span className="flex-1 text-sm font-medium truncate">{item.title}</span>
+                          {area && (
+                            <span className="rounded-lg px-2.5 py-1 text-[11px] font-medium"
+                              style={{ backgroundColor: `hsl(${area.color} / 0.12)`, color: `hsl(${area.color})` }}>
+                              {area.name}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="mt-3 flex justify-center">
