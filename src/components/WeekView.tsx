@@ -86,7 +86,7 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                     )}
                   </div>
 
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-1 space-y-4">
                     {grouped.map(group => (
                       <div key={group.typeId}>
                         <div className="flex items-center gap-1.5 mb-1">
