@@ -5,48 +5,102 @@
 @tailwind utilities;
 
 @layer base {
+  /* Dark mode as default */
   :root {
-    --background: 36 33% 95%;
-    --foreground: 228 30% 7%;
+    --background: 222 47% 11%;
+    --foreground: 214 32% 91%;
+
+    --card: 217 33% 17%;
+    --card-foreground: 214 32% 91%;
+
+    --popover: 217 33% 17%;
+    --popover-foreground: 214 32% 91%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 19% 27%;
+    --secondary-foreground: 214 32% 91%;
+
+    --muted: 215 25% 27%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 214 32% 91%;
+
+    --border: 215 25% 27%;
+    --input: 215 25% 27%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 214 32% 91%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 19% 27%;
+    --sidebar-accent-foreground: 214 32% 91%;
+    --sidebar-border: 215 25% 27%;
+    --sidebar-ring: 217 91% 60%;
+
+    /* Semantic calendar colors */
+    --color-event: 217 91% 60%;
+    --color-task: 263 70% 76%;
+    --color-deadline: 38 92% 50%;
+    --color-routine: 173 58% 39%;
+    --color-done: 142 71% 45%;
+
+    --font-display: 'Fraunces', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  /* Light mode (optional) */
+  .light {
+    --background: 210 40% 96%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 228 30% 7%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 228 30% 7%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 37 92% 60%;
-    --primary-foreground: 228 30% 7%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 20% 90%;
-    --secondary-foreground: 228 30% 15%;
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 36 15% 92%;
-    --muted-foreground: 228 10% 45%;
+    --muted: 210 40% 93%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 37 92% 60%;
-    --accent-foreground: 228 30% 7%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 36 15% 88%;
-    --input: 36 15% 88%;
-    --ring: 37 92% 60%;
-
-    --radius: 0.75rem;
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 217 91% 60%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 228 30% 7%;
-    --sidebar-primary: 37 92% 60%;
-    --sidebar-primary-foreground: 228 30% 7%;
-    --sidebar-accent: 36 20% 94%;
-    --sidebar-accent-foreground: 228 30% 7%;
-    --sidebar-border: 36 15% 90%;
-    --sidebar-ring: 37 92% 60%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 32% 94%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 90%;
+    --sidebar-ring: 217 91% 60%;
 
-    --font-display: 'Fraunces', serif;
-    --font-body: 'DM Sans', sans-serif;
+    --color-event: 217 91% 60%;
+    --color-task: 263 70% 76%;
+    --color-deadline: 38 92% 50%;
+    --color-routine: 173 58% 39%;
+    --color-done: 142 71% 45%;
   }
 }
 
