@@ -24,5 +24,12 @@ export function useTypes() {
     persist(getTypes().filter(t => t.id !== id));
   }, [persist]);
 
-  return { types, addType, updateType, deleteType };
+  const reorderTypes = useCallback((fromIndex: number, toIndex: number) => {
+    const current = [...getTypes()];
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+    persist(current);
+  }, [persist]);
+
+  return { types, addType, updateType, deleteType, reorderTypes };
 }

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, X, Edit2, Trash2, Palette, Tag, User, ChevronDown, ChevronRight } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, X, Edit2, Trash2, Palette, Tag, User, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
 import { Area, ItemType, FilterState } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ interface AppSidebarProps {
   onAddType: (t: Omit<ItemType, 'id'>) => void;
   onUpdateType: (id: string, updates: Partial<Omit<ItemType, 'id'>>) => void;
   onDeleteType: (id: string) => void;
+  onReorderTypes: (fromIndex: number, toIndex: number) => void;
   open: boolean;
   collapsed: boolean;
   onClose: () => void;
@@ -35,6 +36,7 @@ export function AppSidebar({
   onToggleAreaFilter, onToggleTypeFilter,
   onAddArea, onUpdateArea, onDeleteArea,
   onAddType, onUpdateType, onDeleteType,
+  onReorderTypes,
   open, collapsed, onClose,
 }: AppSidebarProps) {
   const [areasOpen, setAreasOpen] = useState(true);
@@ -44,6 +46,9 @@ export function AppSidebar({
   const [newTypeName, setNewTypeName] = useState('');
   const [editingArea, setEditingArea] = useState<string | null>(null);
   const [editingType, setEditingType] = useState<string | null>(null);
+
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const handleAddArea = () => {
     if (!newAreaName.trim()) return;
@@ -56,6 +61,28 @@ export function AppSidebar({
     if (!newTypeName.trim()) return;
     onAddType({ name: newTypeName.trim() });
     setNewTypeName('');
+  };
+
+  const handleDragStart = (index: number) => {
+    dragIndexRef.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (index: number) => {
+    if (dragIndexRef.current !== null && dragIndexRef.current !== index) {
+      onReorderTypes(dragIndexRef.current, index);
+    }
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
   };
 
   const sidebarWidth = collapsed ? 'w-0 md:w-14' : 'w-60';
@@ -192,8 +219,22 @@ export function AppSidebar({
             </div>
 
             <CollapsibleContent className="mt-2 space-y-0.5">
-              {types.map(t => (
-                <div key={t.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+              {types.map((t, index) => (
+                <div
+                  key={t.id}
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={e => handleDragOver(e, index)}
+                  onDrop={() => handleDrop(index)}
+                  onDragEnd={handleDragEnd}
+                  className={cn(
+                    'group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors',
+                    dragOverIndex === index && 'border-t-2 border-primary'
+                  )}
+                >
+                  <span className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                    <GripVertical className="h-3.5 w-3.5" />
+                  </span>
                   <Checkbox
                     checked={filters.typeIds.length === 0 || filters.typeIds.includes(t.id)}
                     onCheckedChange={() => onToggleTypeFilter(t.id)}
