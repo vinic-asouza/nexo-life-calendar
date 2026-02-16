@@ -57,10 +57,10 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-x-auto">
-      <div className="grid min-w-[700px] grid-cols-6 gap-0 flex-1">
+    <div className="flex-1 flex flex-col overflow-x-auto h-full">
+      <div className="grid min-w-[700px] grid-cols-6 gap-0 h-full">
         {columns.map((col, colIdx) => (
-          <div key={colIdx} className={cn('border-r last:border-r-0 flex flex-col', colIdx === 5 && 'divide-y divide-border')}>
+          <div key={colIdx} className={cn('border-r last:border-r-0 flex flex-col min-h-0', colIdx === 5 && 'divide-y divide-border')}>
             {col.days.map((day, dayIdx) => {
               const dayItems = getItemsForDate(items, day, filters);
               const dayKey = colIdx * 10 + dayIdx;

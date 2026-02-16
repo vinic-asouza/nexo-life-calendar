@@ -34,6 +34,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
+  const numWeeks = days.length / 7;
 
   const WEEKDAY_LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
@@ -66,8 +67,8 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
   }, [viewDayItems, types, viewDayModal]);
 
   return (
-    <div className="flex-1 p-2 md:p-4">
-      <div className="grid grid-cols-7 gap-px rounded-xl bg-border overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden h-full">
+      <div className="grid grid-cols-7 gap-px bg-border flex-1" style={{ gridTemplateRows: `auto repeat(${numWeeks}, 1fr)` }}>
         {WEEKDAY_LABELS.map(d => (
           <div key={d} className="bg-muted/50 px-2 py-2 text-center text-[10px] font-semibold uppercase text-muted-foreground">
             {d}
@@ -85,7 +86,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
             <div
               key={key}
               className={cn(
-                'relative min-h-[120px] bg-card p-1.5 md:p-2',
+                'relative bg-card p-1.5 md:p-2 overflow-hidden',
                 !inMonth && 'bg-muted/30'
               )}
             >
