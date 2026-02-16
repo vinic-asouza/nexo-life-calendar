@@ -24,5 +24,12 @@ export function useAreas() {
     persist(getAreas().filter(a => a.id !== id));
   }, [persist]);
 
-  return { areas, addArea, updateArea, deleteArea };
+  const reorderAreas = useCallback((fromIndex: number, toIndex: number) => {
+    const current = [...getAreas()];
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+    persist(current);
+  }, [persist]);
+
+  return { areas, addArea, updateArea, deleteArea, reorderAreas };
 }

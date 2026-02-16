@@ -41,7 +41,14 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
     });
     types.forEach(t => {
       const items = map.get(t.id);
-      if (items) groups.push({ typeId: t.id, typeName: t.name, items });
+      if (items) {
+        items.sort((a, b) => {
+          const ai = areas.findIndex(ar => ar.id === a.areaId);
+          const bi = areas.findIndex(ar => ar.id === b.areaId);
+          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+        });
+        groups.push({ typeId: t.id, typeName: t.name, items });
+      }
     });
     map.forEach((items, typeId) => {
       if (!types.find(t => t.id === typeId)) groups.push({ typeId, typeName: 'Sem tipo', items });
