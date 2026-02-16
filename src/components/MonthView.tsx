@@ -48,8 +48,12 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
       if (existing) existing.push(item);
       else typeMap.set(item.typeId, [item]);
     });
+    types.forEach(t => {
+      const items = typeMap.get(t.id);
+      if (items) groups.push({ type: t, items });
+    });
     typeMap.forEach((items, typeId) => {
-      groups.push({ type: types.find(t => t.id === typeId), items });
+      if (!types.find(t => t.id === typeId)) groups.push({ type: undefined, items });
     });
     return groups;
   }, [viewDayItems, types, viewDayModal]);

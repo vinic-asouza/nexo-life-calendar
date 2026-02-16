@@ -39,9 +39,12 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
       arr.push(item);
       map.set(item.typeId, arr);
     });
+    types.forEach(t => {
+      const items = map.get(t.id);
+      if (items) groups.push({ typeId: t.id, typeName: t.name, items });
+    });
     map.forEach((items, typeId) => {
-      const type = types.find(t => t.id === typeId);
-      groups.push({ typeId, typeName: type?.name || 'Sem tipo', items });
+      if (!types.find(t => t.id === typeId)) groups.push({ typeId, typeName: 'Sem tipo', items });
     });
     return groups;
   };
