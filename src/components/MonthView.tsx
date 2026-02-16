@@ -109,7 +109,11 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
               </div>
 
               <div className="mt-1 space-y-0.5">
-                {dayItems.slice(0, MAX_VISIBLE).map(item => {
+                {[...dayItems].sort((a, b) => {
+                  const ai = types.findIndex(t => t.id === a.typeId);
+                  const bi = types.findIndex(t => t.id === b.typeId);
+                  return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+                }).slice(0, MAX_VISIBLE).map(item => {
                   const area = areas.find(a => a.id === item.areaId);
                   return (
                     <div
