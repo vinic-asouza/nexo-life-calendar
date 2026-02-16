@@ -50,7 +50,14 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
     });
     types.forEach(t => {
       const items = typeMap.get(t.id);
-      if (items) groups.push({ type: t, items });
+      if (items) {
+        items.sort((a, b) => {
+          const ai = areas.findIndex(ar => ar.id === a.areaId);
+          const bi = areas.findIndex(ar => ar.id === b.areaId);
+          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+        });
+        groups.push({ type: t, items });
+      }
     });
     typeMap.forEach((items, typeId) => {
       if (!types.find(t => t.id === typeId)) groups.push({ type: undefined, items });
@@ -110,8 +117,10 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
 
               <div className="mt-1 space-y-0.5">
                 {[...dayItems].sort((a, b) => {
-                  const ai = types.findIndex(t => t.id === a.typeId);
-                  const bi = types.findIndex(t => t.id === b.typeId);
+                  const ti = types.findIndex(t => t.id === a.typeId) - types.findIndex(t => t.id === b.typeId);
+                  if (ti !== 0) return ti;
+                  const ai = areas.findIndex(ar => ar.id === a.areaId);
+                  const bi = areas.findIndex(ar => ar.id === b.areaId);
                   return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
                 }).slice(0, MAX_VISIBLE).map(item => {
                   const area = areas.find(a => a.id === item.areaId);

@@ -13,7 +13,7 @@ import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 
 const Index = () => {
   const { items, addItem, updateItem, deleteItem, toggleStatus } = useItems();
-  const { areas, addArea, updateArea, deleteArea } = useAreas();
+  const { areas, addArea, updateArea, deleteArea, reorderAreas } = useAreas();
   const { types, addType, updateType, deleteType, reorderTypes } = useTypes();
   const { currentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
 
@@ -86,6 +86,7 @@ const Index = () => {
           onAddArea={addArea}
           onUpdateArea={updateArea}
           onDeleteArea={deleteArea}
+          onReorderAreas={reorderAreas}
           onAddType={addType}
           onUpdateType={updateType}
           onDeleteType={deleteType}

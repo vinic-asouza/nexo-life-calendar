@@ -22,6 +22,7 @@ interface AppSidebarProps {
   onAddArea: (area: Omit<Area, 'id'>) => void;
   onUpdateArea: (id: string, updates: Partial<Omit<Area, 'id'>>) => void;
   onDeleteArea: (id: string) => void;
+  onReorderAreas: (fromIndex: number, toIndex: number) => void;
   onAddType: (t: Omit<ItemType, 'id'>) => void;
   onUpdateType: (id: string, updates: Partial<Omit<ItemType, 'id'>>) => void;
   onDeleteType: (id: string) => void;
@@ -34,7 +35,7 @@ interface AppSidebarProps {
 export function AppSidebar({
   areas, types, filters,
   onToggleAreaFilter, onToggleTypeFilter,
-  onAddArea, onUpdateArea, onDeleteArea,
+  onAddArea, onUpdateArea, onDeleteArea, onReorderAreas,
   onAddType, onUpdateType, onDeleteType,
   onReorderTypes,
   open, collapsed, onClose,
@@ -47,8 +48,10 @@ export function AppSidebar({
   const [editingArea, setEditingArea] = useState<string | null>(null);
   const [editingType, setEditingType] = useState<string | null>(null);
 
-  const dragIndexRef = useRef<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragTypeIndexRef = useRef<number | null>(null);
+  const [dragTypeOverIndex, setDragTypeOverIndex] = useState<number | null>(null);
+  const dragAreaIndexRef = useRef<number | null>(null);
+  const [dragAreaOverIndex, setDragAreaOverIndex] = useState<number | null>(null);
 
   const handleAddArea = () => {
     if (!newAreaName.trim()) return;
@@ -63,27 +66,23 @@ export function AppSidebar({
     setNewTypeName('');
   };
 
-  const handleDragStart = (index: number) => {
-    dragIndexRef.current = index;
+  // Type drag handlers
+  const handleTypeDragStart = (index: number) => { dragTypeIndexRef.current = index; };
+  const handleTypeDragOver = (e: React.DragEvent, index: number) => { e.preventDefault(); setDragTypeOverIndex(index); };
+  const handleTypeDrop = (index: number) => {
+    if (dragTypeIndexRef.current !== null && dragTypeIndexRef.current !== index) onReorderTypes(dragTypeIndexRef.current, index);
+    dragTypeIndexRef.current = null; setDragTypeOverIndex(null);
   };
+  const handleTypeDragEnd = () => { dragTypeIndexRef.current = null; setDragTypeOverIndex(null); };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    setDragOverIndex(index);
+  // Area drag handlers
+  const handleAreaDragStart = (index: number) => { dragAreaIndexRef.current = index; };
+  const handleAreaDragOver = (e: React.DragEvent, index: number) => { e.preventDefault(); setDragAreaOverIndex(index); };
+  const handleAreaDrop = (index: number) => {
+    if (dragAreaIndexRef.current !== null && dragAreaIndexRef.current !== index) onReorderAreas(dragAreaIndexRef.current, index);
+    dragAreaIndexRef.current = null; setDragAreaOverIndex(null);
   };
-
-  const handleDrop = (index: number) => {
-    if (dragIndexRef.current !== null && dragIndexRef.current !== index) {
-      onReorderTypes(dragIndexRef.current, index);
-    }
-    dragIndexRef.current = null;
-    setDragOverIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    dragIndexRef.current = null;
-    setDragOverIndex(null);
-  };
+  const handleAreaDragEnd = () => { dragAreaIndexRef.current = null; setDragAreaOverIndex(null); };
 
   const sidebarWidth = collapsed ? 'w-0 md:w-14' : 'w-60';
 
@@ -156,8 +155,22 @@ export function AppSidebar({
             </div>
 
             <CollapsibleContent className="mt-2 space-y-0.5">
-              {areas.map(area => (
-                <div key={area.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+              {areas.map((area, index) => (
+                <div
+                  key={area.id}
+                  draggable
+                  onDragStart={() => handleAreaDragStart(index)}
+                  onDragOver={e => handleAreaDragOver(e, index)}
+                  onDrop={() => handleAreaDrop(index)}
+                  onDragEnd={handleAreaDragEnd}
+                  className={cn(
+                    'group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors',
+                    dragAreaOverIndex === index && 'border-t-2 border-primary'
+                  )}
+                >
+                  <span className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                    <GripVertical className="h-3.5 w-3.5" />
+                  </span>
                   <Checkbox
                     checked={filters.areaIds.length === 0 || filters.areaIds.includes(area.id)}
                     onCheckedChange={() => onToggleAreaFilter(area.id)}
@@ -223,13 +236,13 @@ export function AppSidebar({
                 <div
                   key={t.id}
                   draggable
-                  onDragStart={() => handleDragStart(index)}
-                  onDragOver={e => handleDragOver(e, index)}
-                  onDrop={() => handleDrop(index)}
-                  onDragEnd={handleDragEnd}
+                  onDragStart={() => handleTypeDragStart(index)}
+                  onDragOver={e => handleTypeDragOver(e, index)}
+                  onDrop={() => handleTypeDrop(index)}
+                  onDragEnd={handleTypeDragEnd}
                   className={cn(
                     'group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors',
-                    dragOverIndex === index && 'border-t-2 border-primary'
+                    dragTypeOverIndex === index && 'border-t-2 border-primary'
                   )}
                 >
                   <span className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">

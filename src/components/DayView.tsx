@@ -38,7 +38,14 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
     // Follow the order defined in `types` array (sidebar order)
     types.forEach(t => {
       const items = typeMap.get(t.id);
-      if (items) groups.push({ type: t, items });
+      if (items) {
+        items.sort((a, b) => {
+          const ai = areas.findIndex(ar => ar.id === a.areaId);
+          const bi = areas.findIndex(ar => ar.id === b.areaId);
+          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+        });
+        groups.push({ type: t, items });
+      }
     });
     // Items with unknown type
     typeMap.forEach((items, typeId) => {
