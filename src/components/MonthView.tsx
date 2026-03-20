@@ -117,34 +117,54 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                 )}
               </div>
 
-              <div className="mt-1 space-y-0.5">
-                {[...dayItems].sort((a, b) => {
-                  const ti = types.findIndex(t => t.id === a.typeId) - types.findIndex(t => t.id === b.typeId);
-                  if (ti !== 0) return ti;
-                  const ai = areas.findIndex(ar => ar.id === a.areaId);
-                  const bi = areas.findIndex(ar => ar.id === b.areaId);
-                  return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-                }).slice(0, MAX_VISIBLE).map(item => {
-                  const area = areas.find(a => a.id === item.areaId);
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => onItemClick(item)}
-                      className={cn(
-                        'cursor-pointer truncate rounded-lg px-1.5 py-0.5 text-[11px] font-medium text-foreground transition-colors hover:opacity-80',
-                        item.status === 'done' && 'opacity-50'
-                      )}
-                      style={{
-                        backgroundColor: area ? `hsl(${area.color} / 0.15)` : 'hsl(var(--muted))',
-                      }}
-                    >
-                      {item.title}
-                    </div>
-                  );
-                })}
-                {dayItems.length > MAX_VISIBLE && (
-                  <p className="px-1 text-[9px] text-muted-foreground">+{dayItems.length - MAX_VISIBLE} mais</p>
-                )}
+              <div className="mt-1.5 space-y-1">
+                {(() => {
+                  // Group items by area, ordered by area order
+                  const areaGroups = new Map<string, { area: Area | undefined; items: CalendarItem[] }>();
+                  dayItems.forEach(item => {
+                    const group = areaGroups.get(item.areaId);
+                    if (group) group.items.push(item);
+                    else areaGroups.set(item.areaId, { area: areas.find(a => a.id === item.areaId), items: [item] });
+                  });
+                  // Sort groups by area order
+                  const sorted = [...areaGroups.values()].sort((a, b) => {
+                    const ai = areas.findIndex(ar => ar.id === a.area?.id);
+                    const bi = areas.findIndex(ar => ar.id === b.area?.id);
+                    return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+                  });
+                  const MAX_DOTS = 5;
+                  return sorted.map(group => {
+                    const showCount = Math.min(group.items.length, MAX_DOTS);
+                    const hasMore = group.items.length > MAX_DOTS;
+                    return (
+                      <div key={group.area?.id || 'none'} className="flex items-center gap-[3px] flex-wrap">
+                        {group.items.slice(0, showCount - (hasMore ? 1 : 0)).map(item => (
+                          <span
+                            key={item.id}
+                            className="block h-2 w-2 rounded-full shrink-0"
+                            style={{
+                              backgroundColor: group.area
+                                ? `hsl(${group.area.color} / ${item.status === 'done' ? 0.3 : 0.8})`
+                                : `hsl(var(--muted-foreground) / ${item.status === 'done' ? 0.2 : 0.5})`,
+                            }}
+                          />
+                        ))}
+                        {hasMore && (
+                          <span
+                            className="flex h-2 w-2 items-center justify-center rounded-full shrink-0"
+                            style={{
+                              backgroundColor: group.area
+                                ? `hsl(${group.area.color} / 0.5)`
+                                : 'hsl(var(--muted-foreground) / 0.3)',
+                            }}
+                          >
+                            <Plus className="h-1.5 w-1.5 text-foreground/70" />
+                          </span>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           );
