@@ -27,7 +27,7 @@ interface MonthViewProps {
   onToggleStatus: (id: string) => void;
 }
 
-export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem }: MonthViewProps) {
+export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
 
   const monthStart = startOfMonth(date);
