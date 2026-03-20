@@ -104,7 +104,7 @@ const Index = () => {
             <WeekView date={currentDate} items={items} areas={areas} types={types} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'month' && (
-            <MonthView date={currentDate} items={items} areas={areas} types={types} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} />
+            <MonthView date={currentDate} items={items} areas={areas} types={types} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
         </main>
       </div>
