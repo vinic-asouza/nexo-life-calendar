@@ -2,7 +2,7 @@ import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate } from '@/hooks/useItems';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, ListChecks, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
@@ -118,6 +118,12 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
+                      {item.checklist && item.checklist.length > 0 && (
+                        <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                      {item.comments && item.comments.length > 0 && (
+                        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
                       {area && (
                         <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
                           style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>

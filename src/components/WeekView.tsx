@@ -2,7 +2,7 @@ import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate } from '@/hooks/useItems';
 import { format, startOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus } from 'lucide-react';
+import { Plus, ListChecks, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
@@ -124,9 +124,17 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                                   if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
                                 }}
                               >
-                                <span className={cn('truncate font-medium block', item.status === 'done' && 'line-through')}>
+                              <div className="flex items-center gap-1">
+                                <span className={cn('truncate font-medium flex-1', item.status === 'done' && 'line-through')}>
                                   {item.title}
                                 </span>
+                                {item.checklist && item.checklist.length > 0 && (
+                                  <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
+                                )}
+                                {item.comments && item.comments.length > 0 && (
+                                  <MessageSquare className="h-3 w-3 text-muted-foreground shrink-0" />
+                                )}
+                              </div>
                               </div>
                             );
                           })}
