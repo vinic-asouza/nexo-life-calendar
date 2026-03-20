@@ -6,7 +6,7 @@ import {
   eachDayOfInterval, isSameMonth, isToday,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Eye, X } from 'lucide-react';
+import { Plus, Eye, X, Check, ListChecks, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -24,9 +24,10 @@ interface MonthViewProps {
   filters: FilterState;
   onItemClick: (item: CalendarItem) => void;
   onAddItem: (date: string) => void;
+  onToggleStatus: (id: string) => void;
 }
 
-export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem }: MonthViewProps) {
+export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
 
   const monthStart = startOfMonth(date);
@@ -182,19 +183,56 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                   <div className="space-y-1">
                     {group.items.map(item => {
                       const area = areas.find(a => a.id === item.areaId);
+                      const isDone = item.status === 'done';
                       return (
                         <div
                           key={item.id}
                           onClick={() => { setViewDayModal(null); onItemClick(item); }}
-                          className="flex items-center gap-2 rounded-lg p-2 cursor-pointer hover:bg-muted/50 transition-colors"
-                        >
-                          <span className="flex-1 text-sm font-medium truncate">{item.title}</span>
-                          {area && (
-                            <span className="rounded-lg px-2.5 py-1 text-[11px] font-medium"
-                              style={{ backgroundColor: `hsl(${area.color} / 0.12)`, color: `hsl(${area.color})` }}>
-                              {area.name}
-                            </span>
+                          className={cn(
+                            'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                            isDone && 'opacity-60'
                           )}
+                          style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                          onMouseEnter={e => {
+                            if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
+                          }}
+                          onMouseLeave={e => {
+                            if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
+                          }}
+                        >
+                          <button
+                            onClick={e => { e.stopPropagation(); onToggleStatus(item.id); }}
+                            className={cn(
+                              'flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
+                              isDone
+                                ? 'border-transparent'
+                                : 'border-muted-foreground/40 hover:border-primary'
+                            )}
+                            style={isDone && area ? { backgroundColor: `hsl(${area.color})`, borderColor: `hsl(${area.color})` } : undefined}
+                          >
+                            {isDone && <Check className="h-3 w-3 text-primary-foreground" />}
+                          </button>
+
+                          <div className="flex-1 min-w-0">
+                            <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
+                              {item.title}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {item.checklist && item.checklist.length > 0 && (
+                              <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
+                            )}
+                            {item.comments && item.comments.length > 0 && (
+                              <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                            )}
+                            {area && (
+                              <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
+                                style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
+                                {area.name}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
