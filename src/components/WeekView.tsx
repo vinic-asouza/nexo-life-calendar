@@ -2,7 +2,7 @@ import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate } from '@/hooks/useItems';
 import { format, startOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus } from 'lucide-react';
+import { Plus, ListChecks, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
