@@ -24,6 +24,7 @@ interface MonthViewProps {
   filters: FilterState;
   onItemClick: (item: CalendarItem) => void;
   onAddItem: (date: string) => void;
+  onToggleStatus: (id: string) => void;
 }
 
 export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem }: MonthViewProps) {
