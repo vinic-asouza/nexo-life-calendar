@@ -16,16 +16,30 @@ export interface Recurrence {
   customDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
 }
 
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface CalendarItem {
   id: string;
   title: string;
-  startDate: string; // ISO date string
-  endDate?: string; // ISO date string for multi-day items
+  startDate: string;
+  endDate?: string;
   areaId: string;
   typeId: string;
   recurrence?: Recurrence;
   notes?: string;
   status: 'pending' | 'done';
+  checklist?: ChecklistItem[];
+  comments?: Comment[];
   createdAt: string;
 }
 

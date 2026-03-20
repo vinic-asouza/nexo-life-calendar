@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Edit2, Trash2 } from 'lucide-react';
-import { CalendarItem, Area, ItemType, RecurrenceType } from '@/types';
+import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send } from 'lucide-react';
+import { CalendarItem, Area, ItemType, RecurrenceType, ChecklistItem, Comment } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { Separator } from '@/components/ui/separator';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -47,6 +48,10 @@ export function ItemModal({
   const [customDays, setCustomDays] = useState<number[]>([]);
   const [notes, setNotes] = useState('');
   const [showMore, setShowMore] = useState(false);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newChecklistText, setNewChecklistText] = useState('');
+  const [newCommentText, setNewCommentText] = useState('');
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -61,6 +66,8 @@ export function ItemModal({
         setRecurrenceType(item.recurrence?.type || '');
         setCustomDays(item.recurrence?.customDays || []);
         setNotes(item.notes || '');
+        setChecklist(item.checklist || []);
+        setComments(item.comments || []);
         setShowMore(!!(item.recurrence || item.notes || item.endDate));
       } else {
         setTitle('');
@@ -71,8 +78,12 @@ export function ItemModal({
         setRecurrenceType('');
         setCustomDays([]);
         setNotes('');
+        setChecklist([]);
+        setComments([]);
         setShowMore(false);
       }
+      setNewChecklistText('');
+      setNewCommentText('');
       setTimeout(() => titleRef.current?.focus(), 100);
     }
   }, [open, item, initialMode, initialDate, areas, types]);
@@ -90,6 +101,8 @@ export function ItemModal({
       recurrence: recurrenceType ? { type: recurrenceType as RecurrenceType, customDays: recurrenceType === 'custom' ? customDays : undefined } : undefined,
       notes: notes || undefined,
       status: item?.status || 'pending' as const,
+      checklist: checklist.length > 0 ? checklist : undefined,
+      comments: comments.length > 0 ? comments : undefined,
     };
 
     if (mode === 'edit' && item) {
@@ -100,16 +113,71 @@ export function ItemModal({
     onClose();
   };
 
+  const addChecklistItem = () => {
+    if (!newChecklistText.trim()) return;
+    const newItem: ChecklistItem = {
+      id: `cl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+      text: newChecklistText.trim(),
+      done: false,
+    };
+    const updated = [...checklist, newItem];
+    setChecklist(updated);
+    setNewChecklistText('');
+    // Auto-save in view mode
+    if (mode === 'view' && item) {
+      onUpdate(item.id, { checklist: updated });
+    }
+  };
+
+  const toggleChecklistItem = (id: string) => {
+    const updated = checklist.map(c => c.id === id ? { ...c, done: !c.done } : c);
+    setChecklist(updated);
+    if (item) {
+      onUpdate(item.id, { checklist: updated });
+    }
+  };
+
+  const removeChecklistItem = (id: string) => {
+    const updated = checklist.filter(c => c.id !== id);
+    setChecklist(updated);
+    if (mode === 'view' && item) {
+      onUpdate(item.id, { checklist: updated });
+    }
+  };
+
+  const addComment = () => {
+    if (!newCommentText.trim()) return;
+    const newComment: Comment = {
+      id: `cm-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+      text: newCommentText.trim(),
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [...comments, newComment];
+    setComments(updated);
+    setNewCommentText('');
+    if (item) {
+      onUpdate(item.id, { comments: updated });
+    }
+  };
+
+  const removeComment = (id: string) => {
+    const updated = comments.filter(c => c.id !== id);
+    setComments(updated);
+    if (item) {
+      onUpdate(item.id, { comments: updated });
+    }
+  };
+
   const area = areas.find(a => a.id === (item?.areaId || areaId));
   const type = types.find(t => t.id === (item?.typeId || typeId));
-
   const isView = mode === 'view';
+  const checklistDoneCount = checklist.filter(c => c.done).length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={onClose}>
       <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-md rounded-t-xl bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-6 shadow-xl sm:rounded-xl animate-in slide-in-from-bottom-4 duration-300"
+        className="relative z-10 w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-[0.75rem] bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-6 shadow-xl sm:rounded-[0.75rem] animate-in slide-in-from-bottom-4 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -123,7 +191,6 @@ export function ItemModal({
         </div>
 
         {isView && item ? (
-          /* View mode */
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <button
@@ -135,19 +202,17 @@ export function ItemModal({
               >
                 {item.status === 'done' && <span className="text-xs text-primary-foreground">✓</span>}
               </button>
-              <h3 className="text-xl font-medium">
-                {item.title}
-              </h3>
+              <h3 className="text-xl font-medium">{item.title}</h3>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {area && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
+                <span className="inline-flex items-center gap-1.5 rounded-[0.75rem] px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
                   {area.name}
                 </span>
               )}
               {type && (
-                <span className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center rounded-[0.75rem] bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                   {type.name}
                 </span>
               )}
@@ -160,10 +225,96 @@ export function ItemModal({
             )}
 
             {item.notes && (
-              <div className="rounded-lg bg-muted/50 p-3">
+              <div className="rounded-[0.75rem] bg-muted/50 p-3">
                 <p className="text-sm text-muted-foreground">{item.notes}</p>
               </div>
             )}
+
+            {/* Checklist Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <ListChecks className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Checklist {checklist.length > 0 && `(${checklistDoneCount}/${checklist.length})`}
+                </span>
+                <Separator className="flex-1" />
+              </div>
+
+              <div className="space-y-1 mb-2">
+                {checklist.map(cl => (
+                  <div key={cl.id} className="flex items-center gap-2 group">
+                    <button
+                      onClick={() => toggleChecklistItem(cl.id)}
+                      className={cn(
+                        'flex h-4 w-4 shrink-0 items-center justify-center rounded-[0.25rem] border transition-colors',
+                        cl.done ? 'bg-primary border-primary' : 'border-muted-foreground/40 hover:border-primary'
+                      )}
+                    >
+                      {cl.done && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+                    </button>
+                    <span className={cn('text-sm flex-1', cl.done && 'text-muted-foreground line-through')}>{cl.text}</span>
+                    <button
+                      onClick={() => removeChecklistItem(cl.id)}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  value={newChecklistText}
+                  onChange={e => setNewChecklistText(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addChecklistItem())}
+                  placeholder="Adicionar item..."
+                  className="h-8 text-sm flex-1"
+                />
+                <Button type="button" size="sm" variant="ghost" onClick={addChecklistItem} className="h-8 w-8 p-0" disabled={!newChecklistText.trim()}>
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Comments Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Comentários {comments.length > 0 && `(${comments.length})`}
+                </span>
+                <Separator className="flex-1" />
+              </div>
+
+              <div className="space-y-2 mb-2">
+                {comments.map(cm => (
+                  <div key={cm.id} className="rounded-[0.75rem] bg-muted/50 p-2.5 group relative">
+                    <p className="text-sm">{cm.text}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(cm.createdAt), 'dd/MM/yyyy HH:mm')}</p>
+                    <button
+                      onClick={() => removeComment(cm.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  value={newCommentText}
+                  onChange={e => setNewCommentText(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addComment())}
+                  placeholder="Escrever comentário..."
+                  className="h-8 text-sm flex-1"
+                />
+                <Button type="button" size="sm" variant="ghost" onClick={addComment} className="h-8 w-8 p-0" disabled={!newCommentText.trim()}>
+                  <Send className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" size="sm" onClick={() => setMode('edit')} className="text-xs gap-1.5">
@@ -261,7 +412,7 @@ export function ItemModal({
                         type="button"
                         onClick={() => setCustomDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
                         className={cn(
-                          'h-8 w-8 rounded-lg text-xs font-medium transition-colors',
+                          'h-8 w-8 rounded-[0.75rem] text-xs font-medium transition-colors',
                           customDays.includes(i) ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         )}
                       >
@@ -279,6 +430,43 @@ export function ItemModal({
                     onChange={e => setNotes(e.target.value)}
                     className="mt-1 min-h-[60px] resize-none text-sm"
                   />
+                </div>
+
+                {/* Checklist in edit/create mode */}
+                <div>
+                  <Label className="text-xs text-muted-foreground">Checklist</Label>
+                  <div className="space-y-1 mt-1 mb-2">
+                    {checklist.map(cl => (
+                      <div key={cl.id} className="flex items-center gap-2 group">
+                        <button
+                          type="button"
+                          onClick={() => toggleChecklistItem(cl.id)}
+                          className={cn(
+                            'flex h-4 w-4 shrink-0 items-center justify-center rounded-[0.25rem] border transition-colors',
+                            cl.done ? 'bg-primary border-primary' : 'border-muted-foreground/40 hover:border-primary'
+                          )}
+                        >
+                          {cl.done && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+                        </button>
+                        <span className={cn('text-sm flex-1', cl.done && 'text-muted-foreground line-through')}>{cl.text}</span>
+                        <button type="button" onClick={() => removeChecklistItem(cl.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newChecklistText}
+                      onChange={e => setNewChecklistText(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem(); } }}
+                      placeholder="Adicionar item..."
+                      className="h-8 text-sm flex-1"
+                    />
+                    <Button type="button" size="sm" variant="ghost" onClick={addChecklistItem} className="h-8 w-8 p-0" disabled={!newChecklistText.trim()}>
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
