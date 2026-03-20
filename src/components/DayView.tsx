@@ -118,6 +118,12 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
+                      {item.checklist && item.checklist.length > 0 && (
+                        <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                      {item.comments && item.comments.length > 0 && (
+                        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
                       {area && (
                         <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
                           style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>

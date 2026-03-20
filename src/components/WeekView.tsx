@@ -124,9 +124,17 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                                   if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
                                 }}
                               >
-                                <span className={cn('truncate font-medium block', item.status === 'done' && 'line-through')}>
+                              <div className="flex items-center gap-1">
+                                <span className={cn('truncate font-medium flex-1', item.status === 'done' && 'line-through')}>
                                   {item.title}
                                 </span>
+                                {item.checklist && item.checklist.length > 0 && (
+                                  <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
+                                )}
+                                {item.comments && item.comments.length > 0 && (
+                                  <MessageSquare className="h-3 w-3 text-muted-foreground shrink-0" />
+                                )}
+                              </div>
                               </div>
                             );
                           })}
