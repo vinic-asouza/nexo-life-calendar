@@ -16,6 +16,86 @@ function parseLocalDate(dateStr: string): Date {
   return new Date(year, month - 1, day);
 }
 
+interface DayCellDotsProps {
+  dayItems: CalendarItem[];
+  areas: Area[];
+  types: ItemType[];
+}
+
+function DayCellDots({ dayItems, areas, types }: DayCellDotsProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [maxDots, setMaxDots] = useState(20);
+
+  const updateMax = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const dotSize = 12; // h-3 = 0.75rem = 12px
+    const gap = 3;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    const dotsPerRow = Math.max(1, Math.floor((w + gap) / (dotSize + gap)));
+    const rows = Math.max(1, Math.floor((h + gap) / (dotSize + gap)));
+    setMaxDots(dotsPerRow * rows);
+  }, []);
+
+  useEffect(() => {
+    updateMax();
+    const observer = new ResizeObserver(updateMax);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [updateMax]);
+
+  // Flatten all items sorted by area then type
+  const allDots = useMemo(() => {
+    const areaGroups = new Map<string, { area: Area | undefined; items: CalendarItem[] }>();
+    dayItems.forEach(item => {
+      const group = areaGroups.get(item.areaId);
+      if (group) group.items.push(item);
+      else areaGroups.set(item.areaId, { area: areas.find(a => a.id === item.areaId), items: [item] });
+    });
+    const sorted = [...areaGroups.values()].sort((a, b) => {
+      const ai = areas.findIndex(ar => ar.id === a.area?.id);
+      const bi = areas.findIndex(ar => ar.id === b.area?.id);
+      return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+    });
+    return sorted.flatMap(group => {
+      const sortedItems = [...group.items].sort((a, b) => {
+        const ai = types.findIndex(t => t.id === a.typeId);
+        const bi = types.findIndex(t => t.id === b.typeId);
+        return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+      });
+      return sortedItems.map(item => ({
+        id: item.id,
+        color: group.area
+          ? `hsl(${group.area.color} / ${item.status === 'done' ? 0.3 : 0.8})`
+          : `hsl(var(--muted-foreground) / ${item.status === 'done' ? 0.2 : 0.5})`,
+      }));
+    });
+  }, [dayItems, areas, types]);
+
+  const hasOverflow = allDots.length > maxDots;
+  const visibleCount = hasOverflow ? maxDots - 1 : allDots.length;
+
+  return (
+    <div ref={containerRef} className="mt-1.5 flex-1 overflow-hidden">
+      <div className="flex items-start content-start gap-[3px] flex-wrap h-full">
+        {allDots.slice(0, visibleCount).map(dot => (
+          <span
+            key={dot.id}
+            className="block h-3 w-3 rounded-full shrink-0"
+            style={{ backgroundColor: dot.color }}
+          />
+        ))}
+        {hasOverflow && (
+          <span className="flex h-3 w-3 items-center justify-center rounded-full shrink-0 bg-muted-foreground/30">
+            <Plus className="h-2 w-2 text-muted-foreground" />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface MonthViewProps {
   date: Date;
   items: CalendarItem[];
