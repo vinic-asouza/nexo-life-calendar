@@ -138,10 +138,16 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                     const hasMore = group.items.length > MAX_DOTS;
                     return (
                       <div key={group.area?.id || 'none'} className="flex items-center gap-[3px] flex-wrap">
-                        {group.items.slice(0, showCount - (hasMore ? 1 : 0)).map(item => (
+                         {group.items
+                          .sort((a, b) => {
+                            const ai = types.findIndex(t => t.id === a.typeId);
+                            const bi = types.findIndex(t => t.id === b.typeId);
+                            return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+                          })
+                          .slice(0, showCount - (hasMore ? 1 : 0)).map(item => (
                           <span
                             key={item.id}
-                            className="block h-2 w-2 rounded-full shrink-0"
+                            className="block h-3 w-3 rounded-full shrink-0"
                             style={{
                               backgroundColor: group.area
                                 ? `hsl(${group.area.color} / ${item.status === 'done' ? 0.3 : 0.8})`
