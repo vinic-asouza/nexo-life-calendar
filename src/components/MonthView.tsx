@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate } from '@/hooks/useItems';
 import {
