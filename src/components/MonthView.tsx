@@ -154,6 +154,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                     </div>
                   );
                 })()}
+              </div>
             </div>
           );
         })}
