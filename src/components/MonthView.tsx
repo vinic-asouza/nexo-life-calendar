@@ -156,8 +156,8 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                           />
                         ))}
                         {hasMore && (
-                          <span
-                            className="flex h-2 w-2 items-center justify-center rounded-full shrink-0"
+                           <span
+                            className="flex h-3 w-3 items-center justify-center rounded-full shrink-0"
                             style={{
                               backgroundColor: group.area
                                 ? `hsl(${group.area.color} / 0.5)`
