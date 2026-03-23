@@ -117,44 +117,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                 )}
               </div>
 
-              <div className="mt-1.5 flex-1 overflow-hidden">
-                {(() => {
-                  // Group items by area, ordered by area order
-                  const areaGroups = new Map<string, { area: Area | undefined; items: CalendarItem[] }>();
-                  dayItems.forEach(item => {
-                    const group = areaGroups.get(item.areaId);
-                    if (group) group.items.push(item);
-                    else areaGroups.set(item.areaId, { area: areas.find(a => a.id === item.areaId), items: [item] });
-                  });
-                  const sorted = [...areaGroups.values()].sort((a, b) => {
-                    const ai = areas.findIndex(ar => ar.id === a.area?.id);
-                    const bi = areas.findIndex(ar => ar.id === b.area?.id);
-                    return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-                  });
-                  return (
-                    <div className="flex items-center gap-[3px] flex-wrap overflow-hidden h-full">
-                      {sorted.flatMap(group => {
-                        const sortedItems = [...group.items].sort((a, b) => {
-                          const ai = types.findIndex(t => t.id === a.typeId);
-                          const bi = types.findIndex(t => t.id === b.typeId);
-                          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-                        });
-                        return sortedItems.map(item => (
-                          <span
-                            key={item.id}
-                            className="block h-3 w-3 rounded-full shrink-0"
-                            style={{
-                              backgroundColor: group.area
-                                ? `hsl(${group.area.color} / ${item.status === 'done' ? 0.3 : 0.8})`
-                                : `hsl(var(--muted-foreground) / ${item.status === 'done' ? 0.2 : 0.5})`,
-                            }}
-                          />
-                        ));
-                      })}
-                    </div>
-                  );
-                })()}
-              </div>
+              <DayCellDots dayItems={dayItems} areas={areas} types={types} />
             </div>
           );
         })}
