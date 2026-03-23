@@ -132,19 +132,15 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                     const bi = areas.findIndex(ar => ar.id === b.area?.id);
                     return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
                   });
-                  const MAX_DOTS = 5;
                   return sorted.map(group => {
-                    const showCount = Math.min(group.items.length, MAX_DOTS);
-                    const hasMore = group.items.length > MAX_DOTS;
+                    const sortedItems = group.items.sort((a, b) => {
+                      const ai = types.findIndex(t => t.id === a.typeId);
+                      const bi = types.findIndex(t => t.id === b.typeId);
+                      return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+                    });
                     return (
-                      <div key={group.area?.id || 'none'} className="flex items-center gap-[3px] flex-wrap">
-                         {group.items
-                          .sort((a, b) => {
-                            const ai = types.findIndex(t => t.id === a.typeId);
-                            const bi = types.findIndex(t => t.id === b.typeId);
-                            return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-                          })
-                          .slice(0, showCount - (hasMore ? 1 : 0)).map(item => (
+                      <div key={group.area?.id || 'none'} className="flex items-center gap-[3px] flex-wrap overflow-hidden" style={{ maxHeight: '18px' }}>
+                        {sortedItems.map((item, idx) => (
                           <span
                             key={item.id}
                             className="block h-3 w-3 rounded-full shrink-0"
@@ -155,18 +151,16 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                             }}
                           />
                         ))}
-                        {hasMore && (
-                           <span
-                            className="flex h-3 w-3 items-center justify-center rounded-full shrink-0"
-                            style={{
-                              backgroundColor: group.area
-                                ? `hsl(${group.area.color} / 0.5)`
-                                : 'hsl(var(--muted-foreground) / 0.3)',
-                            }}
-                          >
-                            <Plus className="h-1.5 w-1.5 text-foreground/70" />
-                          </span>
-                        )}
+                        <span
+                          className="flex h-3 w-3 items-center justify-center rounded-full shrink-0"
+                          style={{
+                            backgroundColor: group.area
+                              ? `hsl(${group.area.color} / 0.5)`
+                              : 'hsl(var(--muted-foreground) / 0.3)',
+                          }}
+                        >
+                          <Plus className="h-1.5 w-1.5 text-foreground/70" />
+                        </span>
                       </div>
                     );
                   });
