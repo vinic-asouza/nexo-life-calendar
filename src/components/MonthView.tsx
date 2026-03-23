@@ -167,7 +167,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
             <div
               key={key}
               className={cn(
-                'relative bg-card p-1.5 md:p-2 overflow-hidden',
+                'relative bg-card p-1.5 md:p-2 overflow-hidden flex flex-col',
                 !inMonth && 'bg-muted/30'
               )}
             >
