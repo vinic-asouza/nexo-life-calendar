@@ -71,11 +71,11 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
               return (
                 <div
                   key={dayIdx}
-                  className={cn('flex-1 p-2 md:p-3 min-h-0 flex flex-col')}
+                  className={cn('flex-1 p-2 md:p-3 min-h-0 flex flex-col overflow-hidden')}
                   onMouseEnter={() => setHoveredDay(dayKey)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="shrink-0 mb-2 flex items-center justify-between">
                     <div>
                       <p className="text-[10px] font-medium uppercase text-muted-foreground">
                         {format(day, 'EEE', { locale: ptBR })}
@@ -97,7 +97,8 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                     )}
                   </div>
 
-                  <div className="flex-1 space-y-4">
+                  <ScrollArea className="flex-1">
+                  <div className="space-y-4">
                     {grouped.map(group => (
                       <div key={group.typeId}>
                         <div className="flex items-center gap-1.5 mb-1">
