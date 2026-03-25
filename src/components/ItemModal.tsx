@@ -39,6 +39,7 @@ export function ItemModal({
   onSave, onUpdate, onDelete, onToggleStatus,
 }: ItemModalProps) {
   const [mode, setMode] = useState(initialMode);
+  const [status, setStatus] = useState<'pending' | 'done'>(item?.status || 'pending');
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(initialDate || format(new Date(), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState('');
