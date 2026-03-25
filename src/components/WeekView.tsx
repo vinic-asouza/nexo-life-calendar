@@ -98,53 +98,53 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                   </div>
 
                   <ScrollArea className="flex-1">
-                  <div className="space-y-4">
-                    {grouped.map(group => (
-                      <div key={group.typeId}>
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                            {group.typeName}
-                          </span>
-                          <Separator className="flex-1" />
+                    <div className="space-y-4">
+                      {grouped.map(group => (
+                        <div key={group.typeId}>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                              {group.typeName}
+                            </span>
+                            <Separator className="flex-1" />
+                          </div>
+                          <div className="space-y-0.5">
+                            {group.items.map(item => {
+                              const area = areas.find(a => a.id === item.areaId);
+                              return (
+                                <div
+                                  key={item.id}
+                                  onClick={() => onItemClick(item)}
+                                  className={cn(
+                                    'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
+                                    item.status === 'done' && 'opacity-50'
+                                  )}
+                                  style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                                  onMouseEnter={e => {
+                                    if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
+                                  }}
+                                  onMouseLeave={e => {
+                                    if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
+                                  }}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    <span className={cn('truncate font-medium flex-1', item.status === 'done' && 'line-through')}>
+                                      {item.title}
+                                    </span>
+                                    {item.checklist && item.checklist.length > 0 && (
+                                      <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    )}
+                                    {item.comments && item.comments.length > 0 && (
+                                      <MessageSquare className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="space-y-0.5">
-                          {group.items.map(item => {
-                            const area = areas.find(a => a.id === item.areaId);
-                            return (
-                              <div
-                                key={item.id}
-                                onClick={() => onItemClick(item)}
-                                className={cn(
-                                  'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
-                                  item.status === 'done' && 'opacity-50'
-                                )}
-                                style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                                onMouseEnter={e => {
-                                  if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
-                                }}
-                                onMouseLeave={e => {
-                                  if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
-                                }}
-                              >
-                              <div className="flex items-center gap-1">
-                                <span className={cn('truncate font-medium flex-1', item.status === 'done' && 'line-through')}>
-                                  {item.title}
-                                </span>
-                                {item.checklist && item.checklist.length > 0 && (
-                                  <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
-                                )}
-                                {item.comments && item.comments.length > 0 && (
-                                  <MessageSquare className="h-3 w-3 text-muted-foreground shrink-0" />
-                    )}
-                  </div>
+                      ))}
+                    </div>
                   </ScrollArea>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               );
             })}
