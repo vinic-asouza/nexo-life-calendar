@@ -59,6 +59,7 @@ export function ItemModal({
     if (open) {
       setMode(initialMode);
       if (item) {
+        setStatus(item.status || 'pending');
         setTitle(item.title);
         setStartDate(item.startDate.split('T')[0]);
         setEndDate(item.endDate?.split('T')[0] || '');
