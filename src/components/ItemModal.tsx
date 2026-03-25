@@ -196,13 +196,13 @@ export function ItemModal({
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <button
-                onClick={() => onToggleStatus(item.id)}
+                onClick={() => { onToggleStatus(item.id); setStatus(s => s === 'done' ? 'pending' : 'done'); }}
                 className={cn(
                   'mt-1 h-5 w-5 rounded-full border-2 transition-colors flex-shrink-0 flex items-center justify-center',
-                  item.status === 'done' ? 'border-primary bg-primary' : 'border-muted-foreground'
+                  status === 'done' ? 'border-primary bg-primary' : 'border-muted-foreground'
                 )}
               >
-                {item.status === 'done' && <span className="text-xs text-primary-foreground">✓</span>}
+                {status === 'done' && <span className="text-xs text-primary-foreground">✓</span>}
               </button>
               <h3 className="text-xl font-medium">{item.title}</h3>
             </div>
