@@ -6,6 +6,7 @@ import { Plus, ListChecks, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface WeekViewProps {
   date: Date;
