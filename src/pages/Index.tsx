@@ -15,7 +15,7 @@ const Index = () => {
   const { items, addItem, updateItem, deleteItem, toggleStatus } = useItems();
   const { areas, addArea, updateArea, deleteArea, reorderAreas } = useAreas();
   const { types, addType, updateType, deleteType, reorderTypes } = useTypes();
-  const { currentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
+  const { currentDate, setCurrentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
