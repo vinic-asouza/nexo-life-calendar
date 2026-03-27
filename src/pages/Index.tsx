@@ -71,6 +71,7 @@ const Index = () => {
         onPrev={goPrev}
         onNext={goNext}
         onToday={goToday}
+        onDateSelect={setCurrentDate}
         onAddItem={() => handleAddItem()}
         onToggleSidebar={handleToggleSidebar}
         sidebarCollapsed={sidebarCollapsed}
