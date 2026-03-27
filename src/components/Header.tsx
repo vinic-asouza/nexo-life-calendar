@@ -72,22 +72,17 @@ export function Header({
       </div>
 
       {/* Center: Date navigation — absolutely centered */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 md:gap-2">
-        <Button variant="ghost" size="icon" onClick={onPrev} className="h-8 w-8">
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-          <PopoverTrigger asChild>
-            <button className="min-w-[140px] text-center text-sm font-medium capitalize hover:text-primary transition-colors md:min-w-[180px] md:text-base">
-              {dateLabel}
-            </button>
-          </PopoverTrigger>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToday(); }}
-            className="text-[10px] text-muted-foreground font-medium hover:text-primary transition-colors -mt-1"
-          >
-            hoje
-          </button>
+      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
+        <div className="flex items-center gap-1 md:gap-2">
+          <Button variant="ghost" size="icon" onClick={onPrev} className="h-8 w-8">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button className="min-w-[140px] text-center text-sm font-medium capitalize hover:text-primary transition-colors md:min-w-[180px] md:text-base">
+                {dateLabel}
+              </button>
+            </PopoverTrigger>
           <PopoverContent className="w-auto p-0 bg-popover/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="center">
             <Calendar
               mode="single"
