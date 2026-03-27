@@ -192,22 +192,40 @@ export function AppSidebar({
                     className="border-2"
                     style={{ borderColor: `hsl(${area.color})`, backgroundColor: (filters.areaIds.length === 0 || filters.areaIds.includes(area.id)) ? `hsl(${area.color})` : 'transparent' }}
                   />
-                  {editingArea === area.id ? (
-                    <Input
-                      value={area.name}
-                      onChange={e => onUpdateArea(area.id, { name: e.target.value })}
-                      onBlur={() => setEditingArea(null)}
-                      onKeyDown={e => e.key === 'Enter' && setEditingArea(null)}
-                      className="h-6 text-sm"
-                      autoFocus
-                    />
-                  ) : (
-                    <span className="flex-1 text-sm truncate">{area.name}</span>
-                  )}
+                  <span className="flex-1 text-sm truncate">{area.name}</span>
                   <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => setEditingArea(area.id)} className="p-0.5 text-muted-foreground hover:text-foreground transition-colors">
-                      <Edit2 className="h-3 w-3" />
-                    </button>
+                    <Popover open={editingArea === area.id} onOpenChange={(open) => { if (!open) setEditingArea(null); }}>
+                      <PopoverTrigger asChild>
+                        <button onClick={() => openEditArea(area)} className="p-0.5 text-muted-foreground hover:text-foreground transition-colors">
+                          <Edit2 className="h-3 w-3" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="right" align="start" className="w-60 p-4 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50 space-y-3">
+                        <p className="text-xs font-semibold">Editar Área</p>
+                        <Input
+                          placeholder="Nome da área"
+                          value={editAreaName}
+                          onChange={e => setEditAreaName(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleSaveEditArea()}
+                          className="h-8 text-sm"
+                          autoFocus
+                        />
+                        <div>
+                          <p className="text-[10px] text-muted-foreground mb-1.5">Cor</p>
+                          <div className="flex flex-wrap gap-2">
+                            {PRESET_COLORS.map(c => (
+                              <button
+                                key={c}
+                                onClick={() => setEditAreaColor(c)}
+                                className={cn('h-6 w-6 rounded-full transition-transform', editAreaColor === c && 'ring-2 ring-offset-2 ring-offset-card ring-primary scale-110')}
+                                style={{ backgroundColor: `hsl(${c})` }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <Button size="sm" onClick={handleSaveEditArea} className="w-full h-8 text-xs" disabled={!editAreaName.trim()}>Salvar</Button>
+                      </PopoverContent>
+                    </Popover>
                     <button onClick={() => onDeleteArea(area.id)} className="p-0.5 text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="h-3 w-3" />
                     </button>
