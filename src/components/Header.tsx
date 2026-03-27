@@ -111,9 +111,16 @@ export function Header({
             </div>
           </PopoverContent>
         </Popover>
-        <Button variant="ghost" size="icon" onClick={onNext} className="h-8 w-8">
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+          <Button variant="ghost" size="icon" onClick={onNext} className="h-8 w-8">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <button
+          onClick={onToday}
+          className="text-[10px] text-muted-foreground font-medium hover:text-primary transition-colors -mt-1"
+        >
+          hoje
+        </button>
       </div>
 
       {/* Right: View selector + Add */}
