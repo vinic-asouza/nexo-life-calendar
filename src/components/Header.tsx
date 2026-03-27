@@ -78,11 +78,16 @@ export function Header({
         </Button>
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
-            <button className="flex flex-col items-center gap-0.5 min-w-[140px] text-center hover:text-primary transition-colors md:min-w-[180px]">
-              <span className="text-sm font-medium capitalize md:text-base">{dateLabel}</span>
-              <span className="text-[10px] text-muted-foreground font-medium hover:text-primary transition-colors">hoje</span>
+            <button className="min-w-[140px] text-center text-sm font-medium capitalize hover:text-primary transition-colors md:min-w-[180px] md:text-base">
+              {dateLabel}
             </button>
           </PopoverTrigger>
+          <button
+            onClick={(e) => { e.stopPropagation(); onToday(); }}
+            className="text-[10px] text-muted-foreground font-medium hover:text-primary transition-colors -mt-1"
+          >
+            hoje
+          </button>
           <PopoverContent className="w-auto p-0 bg-popover/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="center">
             <Calendar
               mode="single"
