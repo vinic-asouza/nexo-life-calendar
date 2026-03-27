@@ -15,6 +15,7 @@ interface HeaderProps {
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
+  onDateSelect: (date: Date) => void;
   onAddItem: () => void;
   onToggleSidebar: () => void;
   sidebarCollapsed?: boolean;
