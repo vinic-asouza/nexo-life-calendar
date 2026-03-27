@@ -46,7 +46,22 @@ export function AppSidebar({
   const [newAreaColor, setNewAreaColor] = useState(PRESET_COLORS[0]);
   const [newTypeName, setNewTypeName] = useState('');
   const [editingArea, setEditingArea] = useState<string | null>(null);
+  const [editAreaName, setEditAreaName] = useState('');
+  const [editAreaColor, setEditAreaColor] = useState('');
   const [editingType, setEditingType] = useState<string | null>(null);
+
+  const openEditArea = (area: Area) => {
+    setEditingArea(area.id);
+    setEditAreaName(area.name);
+    setEditAreaColor(area.color);
+  };
+
+  const handleSaveEditArea = () => {
+    if (editingArea && editAreaName.trim()) {
+      onUpdateArea(editingArea, { name: editAreaName.trim(), color: editAreaColor });
+      setEditingArea(null);
+    }
+  };
 
   const dragTypeIndexRef = useRef<number | null>(null);
   const [dragTypeOverIndex, setDragTypeOverIndex] = useState<number | null>(null);
