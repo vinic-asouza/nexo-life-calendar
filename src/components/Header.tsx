@@ -34,10 +34,13 @@ export function Header({
   onPrev,
   onNext,
   onToday,
+  onDateSelect,
   onAddItem,
   onToggleSidebar,
   sidebarCollapsed,
 }: HeaderProps) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
   const dateLabel = (() => {
     switch (viewMode) {
       case 'day':
@@ -73,12 +76,41 @@ export function Header({
         <Button variant="ghost" size="icon" onClick={onPrev} className="h-8 w-8">
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <button
-          onClick={onToday}
-          className="min-w-[140px] text-center text-sm font-medium capitalize hover:text-primary transition-colors md:min-w-[180px] md:text-base"
-        >
-          {dateLabel}
-        </button>
+        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+          <PopoverTrigger asChild>
+            <button className="flex flex-col items-center gap-0.5 min-w-[140px] text-center hover:text-primary transition-colors md:min-w-[180px]">
+              <span className="text-sm font-medium capitalize md:text-base">{dateLabel}</span>
+              <span className="text-[10px] text-muted-foreground font-medium hover:text-primary transition-colors">hoje</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 bg-popover/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="center">
+            <Calendar
+              mode="single"
+              selected={currentDate}
+              onSelect={(date) => {
+                if (date) {
+                  onDateSelect(date);
+                  setCalendarOpen(false);
+                }
+              }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+            <div className="px-3 pb-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs"
+                onClick={() => {
+                  onToday();
+                  setCalendarOpen(false);
+                }}
+              >
+                Hoje
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
         <Button variant="ghost" size="icon" onClick={onNext} className="h-8 w-8">
           <ChevronRight className="h-4 w-4" />
         </Button>
