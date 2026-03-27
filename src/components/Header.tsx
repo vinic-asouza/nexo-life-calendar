@@ -4,6 +4,9 @@ import { ViewMode } from '@/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useState } from 'react';
 
 interface HeaderProps {
   currentDate: Date;
