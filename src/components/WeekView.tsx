@@ -16,7 +16,7 @@ interface WeekViewProps {
   filters: FilterState;
   onItemClick: (item: CalendarItem) => void;
   onAddItem: (date: string) => void;
-  onToggleStatus: (id: string) => void;
+  onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
 export function WeekView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
