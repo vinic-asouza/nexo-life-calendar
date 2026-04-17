@@ -14,7 +14,7 @@ interface WeekViewProps {
   areas: Area[];
   types: ItemType[];
   filters: FilterState;
-  onItemClick: (item: CalendarItem) => void;
+  onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
@@ -115,7 +115,7 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                               return (
                                 <div
                                   key={item.id}
-                                  onClick={() => onItemClick(item)}
+                                  onClick={() => onItemClick(item, dayStr)}
                                   className={cn(
                                     'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
                                     isDone && 'opacity-50'

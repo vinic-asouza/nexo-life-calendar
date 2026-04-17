@@ -106,7 +106,7 @@ interface MonthViewProps {
   areas: Area[];
   types: ItemType[];
   filters: FilterState;
-  onItemClick: (item: CalendarItem) => void;
+  onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
@@ -243,7 +243,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                       return (
                         <div
                           key={item.id}
-                          onClick={() => { setViewDayModal(null); onItemClick(item); }}
+                          onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
                           className={cn(
                             'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
                             isDone && 'opacity-60'

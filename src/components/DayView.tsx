@@ -15,7 +15,7 @@ interface DayViewProps {
   areas: Area[];
   types: ItemType[];
   filters: FilterState;
-  onItemClick: (item: CalendarItem) => void;
+  onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
@@ -87,7 +87,7 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                   return (
                     <div
                       key={item.id}
-                      onClick={() => onItemClick(item)}
+                      onClick={() => onItemClick(item, dateStr)}
                       className={cn(
                         'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
                         isDone && 'opacity-60'
