@@ -38,6 +38,7 @@ export interface CalendarItem {
   recurrence?: Recurrence;
   notes?: string;
   status: 'pending' | 'done';
+  completedDates?: string[]; // YYYY-MM-DD list of completed occurrences (for recurring items)
   checklist?: ChecklistItem[];
   comments?: Comment[];
   createdAt: string;

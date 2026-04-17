@@ -29,13 +29,34 @@ export function useItems() {
     persist(getItems().filter(i => i.id !== id));
   }, [persist]);
 
-  const toggleStatus = useCallback((id: string) => {
-    persist(getItems().map(i =>
-      i.id === id ? { ...i, status: i.status === 'done' ? 'pending' as const : 'done' as const } : i
-    ));
+  const toggleStatus = useCallback((id: string, occurrenceDate?: string) => {
+    persist(getItems().map(i => {
+      if (i.id !== id) return i;
+      // Recurring items: track per-date completion
+      if (i.recurrence && occurrenceDate) {
+        const completed = i.completedDates || [];
+        const isDone = completed.includes(occurrenceDate);
+        return {
+          ...i,
+          completedDates: isDone
+            ? completed.filter(d => d !== occurrenceDate)
+            : [...completed, occurrenceDate],
+        };
+      }
+      // Non-recurring: toggle global status
+      return { ...i, status: i.status === 'done' ? 'pending' as const : 'done' as const };
+    }));
   }, [persist]);
 
   return { items, addItem, updateItem, deleteItem, toggleStatus };
+}
+
+// Check if an item is "done" for a given date
+export function isItemDoneOnDate(item: CalendarItem, dateStr: string): boolean {
+  if (item.recurrence) {
+    return item.completedDates?.includes(dateStr) ?? false;
+  }
+  return item.status === 'done';
 }
 
 // Check if a recurring item falls on a specific date
