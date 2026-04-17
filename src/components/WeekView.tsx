@@ -1,5 +1,5 @@
 import { CalendarItem, Area, ItemType, FilterState } from '@/types';
-import { getItemsForDate } from '@/hooks/useItems';
+import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import { format, startOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plus, ListChecks, MessageSquare } from 'lucide-react';
@@ -14,9 +14,9 @@ interface WeekViewProps {
   areas: Area[];
   types: ItemType[];
   filters: FilterState;
-  onItemClick: (item: CalendarItem) => void;
+  onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
-  onToggleStatus: (id: string) => void;
+  onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
 export function WeekView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
@@ -110,13 +110,15 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                           <div className="space-y-0.5">
                             {group.items.map(item => {
                               const area = areas.find(a => a.id === item.areaId);
+                              const dayStr = format(day, 'yyyy-MM-dd');
+                              const isDone = isItemDoneOnDate(item, dayStr);
                               return (
                                 <div
                                   key={item.id}
-                                  onClick={() => onItemClick(item)}
+                                  onClick={() => onItemClick(item, dayStr)}
                                   className={cn(
                                     'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
-                                    item.status === 'done' && 'opacity-50'
+                                    isDone && 'opacity-50'
                                   )}
                                   style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
                                   onMouseEnter={e => {
@@ -127,7 +129,7 @@ export function WeekView({ date, items, areas, types, filters, onItemClick, onAd
                                   }}
                                 >
                                   <div className="flex items-center gap-1">
-                                    <span className={cn('truncate font-medium flex-1', item.status === 'done' && 'line-through')}>
+                                    <span className={cn('truncate font-medium flex-1', isDone && 'line-through')}>
                                       {item.title}
                                     </span>
                                     {item.checklist && item.checklist.length > 0 && (

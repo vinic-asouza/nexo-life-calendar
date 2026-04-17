@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { CalendarItem, Area, ItemType, FilterState } from '@/types';
-import { getItemsForDate } from '@/hooks/useItems';
+import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   eachDayOfInterval, isSameMonth, isToday,
@@ -20,9 +20,10 @@ interface DayCellDotsProps {
   dayItems: CalendarItem[];
   areas: Area[];
   types: ItemType[];
+  dateStr: string;
 }
 
-function DayCellDots({ dayItems, areas, types }: DayCellDotsProps) {
+function DayCellDots({ dayItems, areas, types, dateStr }: DayCellDotsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [maxDots, setMaxDots] = useState(20);
 
@@ -64,14 +65,17 @@ function DayCellDots({ dayItems, areas, types }: DayCellDotsProps) {
         const bi = types.findIndex(t => t.id === b.typeId);
         return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
       });
-      return sortedItems.map(item => ({
-        id: item.id,
-        color: group.area
-          ? `hsl(${group.area.color} / ${item.status === 'done' ? 0.3 : 0.8})`
-          : `hsl(var(--muted-foreground) / ${item.status === 'done' ? 0.2 : 0.5})`,
-      }));
+      return sortedItems.map(item => {
+        const done = isItemDoneOnDate(item, dateStr);
+        return {
+          id: item.id,
+          color: group.area
+            ? `hsl(${group.area.color} / ${done ? 0.3 : 0.8})`
+            : `hsl(var(--muted-foreground) / ${done ? 0.2 : 0.5})`,
+        };
+      });
     });
-  }, [dayItems, areas, types]);
+  }, [dayItems, areas, types, dateStr]);
 
   const hasOverflow = allDots.length > maxDots;
   const visibleCount = hasOverflow ? maxDots - 1 : allDots.length;
@@ -102,9 +106,9 @@ interface MonthViewProps {
   areas: Area[];
   types: ItemType[];
   filters: FilterState;
-  onItemClick: (item: CalendarItem) => void;
+  onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
-  onToggleStatus: (id: string) => void;
+  onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
 export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
@@ -197,7 +201,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                 )}
               </div>
 
-              <DayCellDots dayItems={dayItems} areas={areas} types={types} />
+              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} />
             </div>
           );
         })}
@@ -235,11 +239,11 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                   <div className="space-y-1">
                     {group.items.map(item => {
                       const area = areas.find(a => a.id === item.areaId);
-                      const isDone = item.status === 'done';
+                      const isDone = isItemDoneOnDate(item, viewDayModal);
                       return (
                         <div
                           key={item.id}
-                          onClick={() => { setViewDayModal(null); onItemClick(item); }}
+                          onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
                           className={cn(
                             'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
                             isDone && 'opacity-60'
@@ -253,7 +257,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                           }}
                         >
                           <button
-                            onClick={e => { e.stopPropagation(); onToggleStatus(item.id); }}
+                            onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
                             className={cn(
                               'flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
                               isDone
