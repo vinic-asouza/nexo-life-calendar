@@ -1,6 +1,6 @@
 import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getItemsForDate } from '@/hooks/useItems';
+import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plus, Check, ListChecks, MessageSquare } from 'lucide-react';
@@ -17,11 +17,12 @@ interface DayViewProps {
   filters: FilterState;
   onItemClick: (item: CalendarItem) => void;
   onAddItem: (date: string) => void;
-  onToggleStatus: (id: string) => void;
+  onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
 export function DayView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: DayViewProps) {
   const dayItems = getItemsForDate(items, date, filters);
+  const dateStr = format(date, 'yyyy-MM-dd');
 
   const groupedItems = useMemo(() => {
     const groups: { type: ItemType | undefined; items: CalendarItem[] }[] = [];
@@ -81,7 +82,7 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
               <div className="space-y-1">
                 {group.items.map(item => {
                   const area = areas.find(a => a.id === item.areaId);
-                  const isDone = item.status === 'done';
+                  const isDone = isItemDoneOnDate(item, dateStr);
 
                   return (
                     <div
@@ -100,7 +101,7 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                       }}
                     >
                       <button
-                        onClick={e => { e.stopPropagation(); onToggleStatus(item.id); }}
+                        onClick={e => { e.stopPropagation(); onToggleStatus(item.id, dateStr); }}
                         className={cn(
                           'flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
                           isDone
@@ -113,7 +114,7 @@ export function DayView({ date, items, areas, types, filters, onItemClick, onAdd
                       </button>
 
                       <div className="flex-1 min-w-0">
-                        <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
+                        <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground line-through')}>
                           {item.title}
                         </p>
                       </div>
