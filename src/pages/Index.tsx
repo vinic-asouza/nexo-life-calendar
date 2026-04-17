@@ -25,6 +25,7 @@ const Index = () => {
   const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit'>('create');
   const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
   const [initialDate, setInitialDate] = useState<string | undefined>();
+  const [occurrenceDate, setOccurrenceDate] = useState<string | undefined>();
 
   const toggleAreaFilter = useCallback((id: string) => {
     setFilters(prev => ({
@@ -43,12 +44,14 @@ const Index = () => {
   const handleAddItem = useCallback((date?: string) => {
     setSelectedItem(null);
     setInitialDate(date);
+    setOccurrenceDate(undefined);
     setModalMode('create');
     setModalOpen(true);
   }, []);
 
-  const handleItemClick = useCallback((item: CalendarItem) => {
+  const handleItemClick = useCallback((item: CalendarItem, occDate?: string) => {
     setSelectedItem(item);
+    setOccurrenceDate(occDate);
     setModalMode('view');
     setModalOpen(true);
   }, []);
@@ -116,6 +119,7 @@ const Index = () => {
         areas={areas}
         types={types}
         initialDate={initialDate}
+        occurrenceDate={occurrenceDate}
         item={selectedItem}
         mode={modalMode}
         onSave={addItem}
