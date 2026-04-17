@@ -26,16 +26,17 @@ interface ItemModalProps {
   areas: Area[];
   types: ItemType[];
   initialDate?: string;
+  occurrenceDate?: string;
   item?: CalendarItem | null;
   mode: 'create' | 'view' | 'edit';
   onSave: (item: Omit<CalendarItem, 'id' | 'createdAt'>) => void;
   onUpdate: (id: string, updates: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>) => void;
   onDelete: (id: string) => void;
-  onToggleStatus: (id: string) => void;
+  onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
 export function ItemModal({
-  open, onClose, areas, types, initialDate, item, mode: initialMode,
+  open, onClose, areas, types, initialDate, occurrenceDate, item, mode: initialMode,
   onSave, onUpdate, onDelete, onToggleStatus,
 }: ItemModalProps) {
   const [mode, setMode] = useState(initialMode);
@@ -59,7 +60,11 @@ export function ItemModal({
     if (open) {
       setMode(initialMode);
       if (item) {
-        setStatus(item.status || 'pending');
+        // Compute per-occurrence done state for recurring items
+        const isDoneForOcc = item.recurrence && occurrenceDate
+          ? (item.completedDates?.includes(occurrenceDate) ?? false)
+          : item.status === 'done';
+        setStatus(isDoneForOcc ? 'done' : 'pending');
         setTitle(item.title);
         setStartDate(item.startDate.split('T')[0]);
         setEndDate(item.endDate?.split('T')[0] || '');
@@ -88,7 +93,7 @@ export function ItemModal({
       setNewCommentText('');
       setTimeout(() => titleRef.current?.focus(), 100);
     }
-  }, [open, item, initialMode, initialDate, areas, types]);
+  }, [open, item, initialMode, initialDate, occurrenceDate, areas, types]);
 
   if (!open) return null;
 
@@ -196,7 +201,7 @@ export function ItemModal({
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <button
-                onClick={() => { onToggleStatus(item.id); setStatus(s => s === 'done' ? 'pending' : 'done'); }}
+                onClick={() => { onToggleStatus(item.id, occurrenceDate); setStatus(s => s === 'done' ? 'pending' : 'done'); }}
                 className={cn(
                   'mt-1 h-5 w-5 rounded-full border-2 transition-colors flex-shrink-0 flex items-center justify-center',
                   status === 'done' ? 'border-primary bg-primary' : 'border-muted-foreground'
