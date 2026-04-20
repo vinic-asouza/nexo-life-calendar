@@ -14,6 +14,7 @@ export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays' | 'cust
 export interface Recurrence {
   type: RecurrenceType;
   customDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
+  endDate?: string; // YYYY-MM-DD: optional last day the recurrence is valid
 }
 
 export interface ChecklistItem {

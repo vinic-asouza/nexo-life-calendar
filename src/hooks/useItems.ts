@@ -86,6 +86,13 @@ function recurringFallsOnDate(item: CalendarItem, date: Date): boolean {
   const itemStart = startOfDay(parseISO(item.startDate));
   if (date < itemStart) return false;
 
+  // Respect recurrence end: prefer recurrence.endDate, fallback to item.endDate
+  const endStr = item.recurrence.endDate ?? item.endDate;
+  if (endStr) {
+    const recurrenceEnd = startOfDay(parseISO(endStr));
+    if (date > recurrenceEnd) return false;
+  }
+
   const dayOfWeek = getDay(date);
 
   switch (item.recurrence.type) {
