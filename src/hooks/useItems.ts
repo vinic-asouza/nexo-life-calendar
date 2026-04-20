@@ -1,14 +1,35 @@
-import { useState, useCallback, useMemo } from 'react';
-import { CalendarItem, FilterState, Recurrence } from '@/types';
+import { useState, useCallback, useEffect } from 'react';
+import { CalendarItem, FilterState } from '@/types';
 import { getItems, saveItems } from '@/services/storage';
-import { format, parseISO, isWithinInterval, startOfDay, endOfDay, eachDayOfInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, getDay } from 'date-fns';
+import { parseISO, startOfDay, getDay } from 'date-fns';
+
+const STORAGE_KEY = 'nexo_items';
 
 export function useItems() {
   const [items, setItems] = useState<CalendarItem[]>(getItems);
 
-  const persist = useCallback((next: CalendarItem[]) => {
-    setItems(next);
-    saveItems(next);
+  // Functional updater: state is the source of truth, storage is a mirror.
+  const mutate = useCallback((updater: (prev: CalendarItem[]) => CalendarItem[]) => {
+    setItems(prev => {
+      const next = updater(prev);
+      saveItems(next);
+      return next;
+    });
+  }, []);
+
+  // Cross-tab sync: listen to storage events from other tabs.
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || e.newValue === null) return;
+      try {
+        const parsed = JSON.parse(e.newValue) as CalendarItem[];
+        setItems(parsed);
+      } catch {
+        // ignore malformed payloads
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
   }, []);
 
   const addItem = useCallback((item: Omit<CalendarItem, 'id' | 'createdAt'>) => {
@@ -17,20 +38,20 @@ export function useItems() {
       id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
     };
-    persist([...getItems(), newItem]);
+    mutate(prev => [...prev, newItem]);
     return newItem;
-  }, [persist]);
+  }, [mutate]);
 
   const updateItem = useCallback((id: string, updates: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>) => {
-    persist(getItems().map(i => i.id === id ? { ...i, ...updates } : i));
-  }, [persist]);
+    mutate(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+  }, [mutate]);
 
   const deleteItem = useCallback((id: string) => {
-    persist(getItems().filter(i => i.id !== id));
-  }, [persist]);
+    mutate(prev => prev.filter(i => i.id !== id));
+  }, [mutate]);
 
   const toggleStatus = useCallback((id: string, occurrenceDate?: string) => {
-    persist(getItems().map(i => {
+    mutate(prev => prev.map(i => {
       if (i.id !== id) return i;
       // Recurring items: track per-date completion
       if (i.recurrence && occurrenceDate) {
@@ -46,7 +67,7 @@ export function useItems() {
       // Non-recurring: toggle global status
       return { ...i, status: i.status === 'done' ? 'pending' as const : 'done' as const };
     }));
-  }, [persist]);
+  }, [mutate]);
 
   return { items, addItem, updateItem, deleteItem, toggleStatus };
 }
