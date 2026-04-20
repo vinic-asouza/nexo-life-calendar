@@ -7,7 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+
+// Parse YYYY-MM-DD as local-time midnight (avoids UTC offset shift).
+const parseLocalDate = (dateStr: string) => parseISO(dateStr.length === 10 ? `${dateStr}T00:00:00` : dateStr);
 import { Separator } from '@/components/ui/separator';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -227,7 +230,7 @@ export function ItemModal({
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground">{format(new Date(item.startDate + 'T00:00:00'), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(new Date(item.endDate + 'T00:00:00'), 'dd/MM/yyyy')}` : ''}</p>
+            <p className="text-sm text-muted-foreground">{format(parseLocalDate(item.startDate), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(parseLocalDate(item.endDate), 'dd/MM/yyyy')}` : ''}</p>
 
             {item.recurrence && (
               <p className="text-sm text-muted-foreground">🔄 {RECURRENCE_LABELS[item.recurrence.type]}</p>
