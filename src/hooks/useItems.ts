@@ -115,9 +115,9 @@ export function getItemsForDate(items: CalendarItem[], date: Date, filters: Filt
   const target = startOfDay(date);
 
   return items.filter(item => {
-    // Filter by area and type
-    if (filters.areaIds.length > 0 && !filters.areaIds.includes(item.areaId)) return false;
-    if (filters.typeIds.length > 0 && !filters.typeIds.includes(item.typeId)) return false;
+    // Filter by area and type — selection is explicit: only items in selected sets are shown.
+    if (!filters.areaIds.includes(item.areaId)) return false;
+    if (!filters.typeIds.includes(item.typeId)) return false;
 
     const itemStart = startOfDay(parseISO(item.startDate));
     const itemEnd = item.endDate ? startOfDay(parseISO(item.endDate)) : itemStart;
