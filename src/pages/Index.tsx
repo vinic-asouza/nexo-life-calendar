@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CalendarItem, FilterState } from '@/types';
 import { Header } from '@/components/Header';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -19,7 +19,28 @@ const Index = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({ areaIds: [], typeIds: [] });
+  // Filters store the set of SELECTED area/type ids. Empty = nothing visible.
+  // Initialized lazily with all current ids so the user starts seeing everything.
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    areaIds: areas.map(a => a.id),
+    typeIds: types.map(t => t.id),
+  }));
+
+  // Auto-include newly created areas/types in the active selection
+  // (otherwise a new area would be invisible until the user manually checked it).
+  useEffect(() => {
+    setFilters(prev => {
+      const knownAreas = new Set(prev.areaIds);
+      const newAreaIds = areas.filter(a => !knownAreas.has(a.id)).map(a => a.id);
+      const knownTypes = new Set(prev.typeIds);
+      const newTypeIds = types.filter(t => !knownTypes.has(t.id)).map(t => t.id);
+      if (newAreaIds.length === 0 && newTypeIds.length === 0) return prev;
+      return {
+        areaIds: [...prev.areaIds, ...newAreaIds],
+        typeIds: [...prev.typeIds, ...newTypeIds],
+      };
+    });
+  }, [areas, types]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit'>('create');
