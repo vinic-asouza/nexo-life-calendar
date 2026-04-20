@@ -105,7 +105,9 @@ export function ItemModal({
       endDate: endDate || undefined,
       areaId,
       typeId,
-      recurrence: recurrenceType ? { type: recurrenceType as RecurrenceType, customDays: recurrenceType === 'custom' ? customDays : undefined } : undefined,
+      recurrence: recurrenceType
+        ? { type: recurrenceType, customDays: recurrenceType === 'custom' ? customDays : undefined }
+        : undefined,
       notes: notes || undefined,
       status: item?.status || 'pending' as const,
       checklist: checklist.length > 0 ? checklist : undefined,
@@ -398,7 +400,7 @@ export function ItemModal({
 
                 <div>
                   <Label className="text-xs text-muted-foreground">Recorrência</Label>
-                  <Select value={recurrenceType} onValueChange={v => setRecurrenceType(v as RecurrenceType | '')}>
+                  <Select value={recurrenceType || 'none'} onValueChange={v => setRecurrenceType(v === 'none' ? '' : (v as RecurrenceType))}>
                     <SelectTrigger className="mt-1 h-9 text-sm">
                       <SelectValue placeholder="Sem recorrência" />
                     </SelectTrigger>
