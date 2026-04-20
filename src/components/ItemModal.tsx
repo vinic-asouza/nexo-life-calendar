@@ -105,7 +105,9 @@ export function ItemModal({
       endDate: endDate || undefined,
       areaId,
       typeId,
-      recurrence: recurrenceType ? { type: recurrenceType as RecurrenceType, customDays: recurrenceType === 'custom' ? customDays : undefined } : undefined,
+      recurrence: recurrenceType && recurrenceType !== 'none'
+        ? { type: recurrenceType as RecurrenceType, customDays: recurrenceType === 'custom' ? customDays : undefined }
+        : undefined,
       notes: notes || undefined,
       status: item?.status || 'pending' as const,
       checklist: checklist.length > 0 ? checklist : undefined,
