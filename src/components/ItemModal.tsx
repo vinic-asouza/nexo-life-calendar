@@ -230,7 +230,7 @@ export function ItemModal({
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground">{format(new Date(item.startDate + 'T00:00:00'), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(new Date(item.endDate + 'T00:00:00'), 'dd/MM/yyyy')}` : ''}</p>
+            <p className="text-sm text-muted-foreground">{format(parseLocalDate(item.startDate), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(parseLocalDate(item.endDate), 'dd/MM/yyyy')}` : ''}</p>
 
             {item.recurrence && (
               <p className="text-sm text-muted-foreground">🔄 {RECURRENCE_LABELS[item.recurrence.type]}</p>
