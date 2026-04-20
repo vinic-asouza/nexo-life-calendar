@@ -187,10 +187,10 @@ export function AppSidebar({
                     <GripVertical className="h-3.5 w-3.5" />
                   </span>
                   <Checkbox
-                    checked={filters.areaIds.length === 0 || filters.areaIds.includes(area.id)}
+                    checked={filters.areaIds.includes(area.id)}
                     onCheckedChange={() => onToggleAreaFilter(area.id)}
                     className="border-2"
-                    style={{ borderColor: `hsl(${area.color})`, backgroundColor: (filters.areaIds.length === 0 || filters.areaIds.includes(area.id)) ? `hsl(${area.color})` : 'transparent' }}
+                    style={{ borderColor: `hsl(${area.color})`, backgroundColor: filters.areaIds.includes(area.id) ? `hsl(${area.color})` : 'transparent' }}
                   />
                   <span className="flex-1 text-sm truncate">{area.name}</span>
                   <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -282,7 +282,7 @@ export function AppSidebar({
                     <GripVertical className="h-3.5 w-3.5" />
                   </span>
                   <Checkbox
-                    checked={filters.typeIds.length === 0 || filters.typeIds.includes(t.id)}
+                    checked={filters.typeIds.includes(t.id)}
                     onCheckedChange={() => onToggleTypeFilter(t.id)}
                   />
                   {editingType === t.id ? (
