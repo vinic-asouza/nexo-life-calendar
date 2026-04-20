@@ -282,7 +282,7 @@ export function AppSidebar({
                     <GripVertical className="h-3.5 w-3.5" />
                   </span>
                   <Checkbox
-                    checked={filters.typeIds.length === 0 || filters.typeIds.includes(t.id)}
+                    checked={filters.typeIds.includes(t.id)}
                     onCheckedChange={() => onToggleTypeFilter(t.id)}
                   />
                   {editingType === t.id ? (
