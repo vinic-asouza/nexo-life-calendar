@@ -13,6 +13,11 @@ import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'dark';
+    const stored = window.localStorage.getItem('nexo_theme');
+    return stored === 'light' ? 'light' : 'dark';
+  });
   const { items, addItem, updateItem, deleteItem, toggleStatus } = useItems();
   const { areas, addArea, updateArea, deleteArea, reorderAreas } = useAreas();
   const { types, addType, updateType, deleteType, reorderTypes } = useTypes();
@@ -87,6 +92,16 @@ const Index = () => {
     }
   }, [isMobile]);
 
+  const handleThemeToggle = useCallback((checked: boolean) => {
+    setTheme(checked ? 'dark' : 'light');
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+    window.localStorage.setItem('nexo_theme', theme);
+  }, [theme]);
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <Header
@@ -120,6 +135,8 @@ const Index = () => {
           open={sidebarOpen}
           collapsed={sidebarCollapsed}
           onClose={() => setSidebarOpen(false)}
+          isDarkMode={theme === 'dark'}
+          onThemeToggle={handleThemeToggle}
         />
 
         <main className="flex-1 overflow-hidden flex flex-col">
