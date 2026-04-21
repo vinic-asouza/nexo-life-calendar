@@ -24,17 +24,21 @@ function normalizeItems(value: unknown): CalendarItem[] {
   return value
     .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
     .map((item, index) => {
-      const recurrenceType = typeof item.recurrence === 'object' && item.recurrence !== null && typeof item.recurrence.type === 'string'
-        ? item.recurrence.type
+      const recurrenceValue = typeof item.recurrence === 'object' && item.recurrence !== null
+        ? item.recurrence as Record<string, unknown>
+        : undefined;
+
+      const recurrenceType = typeof recurrenceValue?.type === 'string'
+        ? recurrenceValue.type
         : undefined;
 
       const recurrence = recurrenceType && RECURRENCE_TYPES.has(recurrenceType as RecurrenceType)
         ? {
             type: recurrenceType as RecurrenceType,
-            customDays: Array.isArray(item.recurrence.customDays)
-              ? item.recurrence.customDays.filter((day): day is number => typeof day === 'number')
+            customDays: Array.isArray(recurrenceValue?.customDays)
+              ? recurrenceValue.customDays.filter((day): day is number => typeof day === 'number')
               : undefined,
-            endDate: typeof item.recurrence.endDate === 'string' ? item.recurrence.endDate : undefined,
+            endDate: typeof recurrenceValue?.endDate === 'string' ? recurrenceValue.endDate : undefined,
           }
         : undefined;
 
