@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, Plus, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ViewMode } from '@/types';
-import { format } from 'date-fns';
+import { format, startOfMonth, startOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -40,6 +40,17 @@ export function Header({
   sidebarCollapsed,
 }: HeaderProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const calendarDate = (() => {
+    switch (viewMode) {
+      case 'day':
+        return currentDate;
+      case 'week':
+        return startOfWeek(currentDate, { weekStartsOn: 1 });
+      case 'month':
+        return startOfMonth(currentDate);
+    }
+  })();
 
   const dateLabel = (() => {
     switch (viewMode) {
@@ -86,10 +97,17 @@ export function Header({
           <PopoverContent className="w-auto p-0 bg-popover/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="center">
             <Calendar
               mode="single"
-              selected={currentDate}
+              selected={calendarDate}
+              month={calendarDate}
               onSelect={(date) => {
                 if (date) {
-                  onDateSelect(date);
+                  onDateSelect(
+                    viewMode === 'week'
+                      ? startOfWeek(date, { weekStartsOn: 1 })
+                      : viewMode === 'month'
+                        ? startOfMonth(date)
+                        : date
+                  );
                   setCalendarOpen(false);
                 }
               }}
