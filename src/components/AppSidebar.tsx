@@ -64,8 +64,10 @@ export function AppSidebar({
   };
 
   const dragTypeIndexRef = useRef<number | null>(null);
+  const [draggingTypeIndex, setDraggingTypeIndex] = useState<number | null>(null);
   const [dragTypeOverIndex, setDragTypeOverIndex] = useState<number | null>(null);
   const dragAreaIndexRef = useRef<number | null>(null);
+  const [draggingAreaIndex, setDraggingAreaIndex] = useState<number | null>(null);
   const [dragAreaOverIndex, setDragAreaOverIndex] = useState<number | null>(null);
 
   const handleAddArea = () => {
@@ -82,22 +84,74 @@ export function AppSidebar({
   };
 
   // Type drag handlers
-  const handleTypeDragStart = (index: number) => { dragTypeIndexRef.current = index; };
+  const handleTypeDragStart = (index: number) => { dragTypeIndexRef.current = index; setDraggingTypeIndex(index); };
   const handleTypeDragOver = (e: React.DragEvent, index: number) => { e.preventDefault(); setDragTypeOverIndex(index); };
   const handleTypeDrop = (index: number) => {
     if (dragTypeIndexRef.current !== null && dragTypeIndexRef.current !== index) onReorderTypes(dragTypeIndexRef.current, index);
-    dragTypeIndexRef.current = null; setDragTypeOverIndex(null);
+    dragTypeIndexRef.current = null; setDraggingTypeIndex(null); setDragTypeOverIndex(null);
   };
-  const handleTypeDragEnd = () => { dragTypeIndexRef.current = null; setDragTypeOverIndex(null); };
+  const handleTypeDragEnd = () => { dragTypeIndexRef.current = null; setDraggingTypeIndex(null); setDragTypeOverIndex(null); };
 
   // Area drag handlers
-  const handleAreaDragStart = (index: number) => { dragAreaIndexRef.current = index; };
+  const handleAreaDragStart = (index: number) => { dragAreaIndexRef.current = index; setDraggingAreaIndex(index); };
   const handleAreaDragOver = (e: React.DragEvent, index: number) => { e.preventDefault(); setDragAreaOverIndex(index); };
   const handleAreaDrop = (index: number) => {
     if (dragAreaIndexRef.current !== null && dragAreaIndexRef.current !== index) onReorderAreas(dragAreaIndexRef.current, index);
-    dragAreaIndexRef.current = null; setDragAreaOverIndex(null);
+    dragAreaIndexRef.current = null; setDraggingAreaIndex(null); setDragAreaOverIndex(null);
   };
-  const handleAreaDragEnd = () => { dragAreaIndexRef.current = null; setDragAreaOverIndex(null); };
+  const handleAreaDragEnd = () => { dragAreaIndexRef.current = null; setDraggingAreaIndex(null); setDragAreaOverIndex(null); };
+
+  const handleAreaTouchStart = (index: number) => {
+    dragAreaIndexRef.current = index;
+    setDraggingAreaIndex(index);
+    setDragAreaOverIndex(index);
+  };
+
+  const handleAreaTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('[data-area-index]');
+    const index = target ? Number((target as HTMLElement).dataset.areaIndex) : NaN;
+    if (!Number.isNaN(index)) setDragAreaOverIndex(index);
+  };
+
+  const handleAreaTouchEnd = () => {
+    if (
+      dragAreaIndexRef.current !== null &&
+      dragAreaOverIndex !== null &&
+      dragAreaIndexRef.current !== dragAreaOverIndex
+    ) {
+      onReorderAreas(dragAreaIndexRef.current, dragAreaOverIndex);
+    }
+    handleAreaDragEnd();
+  };
+
+  const handleTypeTouchStart = (index: number) => {
+    dragTypeIndexRef.current = index;
+    setDraggingTypeIndex(index);
+    setDragTypeOverIndex(index);
+  };
+
+  const handleTypeTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('[data-type-index]');
+    const index = target ? Number((target as HTMLElement).dataset.typeIndex) : NaN;
+    if (!Number.isNaN(index)) setDragTypeOverIndex(index);
+  };
+
+  const handleTypeTouchEnd = () => {
+    if (
+      dragTypeIndexRef.current !== null &&
+      dragTypeOverIndex !== null &&
+      dragTypeIndexRef.current !== dragTypeOverIndex
+    ) {
+      onReorderTypes(dragTypeIndexRef.current, dragTypeOverIndex);
+    }
+    handleTypeDragEnd();
+  };
 
   const sidebarWidth = collapsed ? 'w-0 md:w-14' : 'w-60';
 
@@ -173,6 +227,7 @@ export function AppSidebar({
               {areas.map((area, index) => (
                 <div
                   key={area.id}
+                  data-area-index={index}
                   draggable
                   onDragStart={() => handleAreaDragStart(index)}
                   onDragOver={e => handleAreaDragOver(e, index)}
@@ -180,12 +235,24 @@ export function AppSidebar({
                   onDragEnd={handleAreaDragEnd}
                   className={cn(
                     'group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors',
-                    dragAreaOverIndex === index && 'border-t-2 border-primary'
+                    dragAreaOverIndex === index && 'border-t-2 border-primary',
+                    draggingAreaIndex === index && 'cursor-grabbing bg-muted/60 opacity-60 ring-1 ring-border'
                   )}
                 >
-                  <span className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                  <button
+                    type="button"
+                    aria-label={`Reordenar área ${area.name}`}
+                    onTouchStart={() => handleAreaTouchStart(index)}
+                    onTouchMove={handleAreaTouchMove}
+                    onTouchEnd={handleAreaTouchEnd}
+                    onTouchCancel={handleAreaDragEnd}
+                    className={cn(
+                      'text-muted-foreground transition-opacity touch-none',
+                      draggingAreaIndex === index ? 'cursor-grabbing opacity-100' : 'cursor-grab opacity-0 group-hover:opacity-100 md:group-hover:opacity-100'
+                    )}
+                  >
                     <GripVertical className="h-3.5 w-3.5" />
-                  </span>
+                  </button>
                   <Checkbox
                     checked={filters.areaIds.includes(area.id)}
                     onCheckedChange={() => onToggleAreaFilter(area.id)}
@@ -268,6 +335,7 @@ export function AppSidebar({
               {types.map((t, index) => (
                 <div
                   key={t.id}
+                  data-type-index={index}
                   draggable
                   onDragStart={() => handleTypeDragStart(index)}
                   onDragOver={e => handleTypeDragOver(e, index)}
@@ -275,12 +343,24 @@ export function AppSidebar({
                   onDragEnd={handleTypeDragEnd}
                   className={cn(
                     'group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors',
-                    dragTypeOverIndex === index && 'border-t-2 border-primary'
+                    dragTypeOverIndex === index && 'border-t-2 border-primary',
+                    draggingTypeIndex === index && 'cursor-grabbing bg-muted/60 opacity-60 ring-1 ring-border'
                   )}
                 >
-                  <span className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                  <button
+                    type="button"
+                    aria-label={`Reordenar tipo ${t.name}`}
+                    onTouchStart={() => handleTypeTouchStart(index)}
+                    onTouchMove={handleTypeTouchMove}
+                    onTouchEnd={handleTypeTouchEnd}
+                    onTouchCancel={handleTypeDragEnd}
+                    className={cn(
+                      'text-muted-foreground transition-opacity touch-none',
+                      draggingTypeIndex === index ? 'cursor-grabbing opacity-100' : 'cursor-grab opacity-0 group-hover:opacity-100 md:group-hover:opacity-100'
+                    )}
+                  >
                     <GripVertical className="h-3.5 w-3.5" />
-                  </span>
+                  </button>
                   <Checkbox
                     checked={filters.typeIds.includes(t.id)}
                     onCheckedChange={() => onToggleTypeFilter(t.id)}
