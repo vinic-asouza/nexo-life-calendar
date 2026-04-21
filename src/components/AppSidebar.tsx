@@ -4,6 +4,7 @@ import { Area, ItemType, FilterState } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -30,6 +31,8 @@ interface AppSidebarProps {
   open: boolean;
   collapsed: boolean;
   onClose: () => void;
+  isDarkMode: boolean;
+  onThemeToggle: (checked: boolean) => void;
 }
 
 export function AppSidebar({
@@ -39,6 +42,7 @@ export function AppSidebar({
   onAddType, onUpdateType, onDeleteType,
   onReorderTypes,
   open, collapsed, onClose,
+  isDarkMode, onThemeToggle,
 }: AppSidebarProps) {
   const [areasOpen, setAreasOpen] = useState(true);
   const [typesOpen, setTypesOpen] = useState(true);
@@ -391,8 +395,11 @@ export function AppSidebar({
           </Collapsible>
         </div>
 
-        {/* Account placeholder */}
-        <div className={cn('border-t p-3', collapsed && 'hidden md:hidden')}>
+        <div className={cn('border-t p-3 space-y-2', collapsed && 'hidden md:hidden')}>
+          <div className="flex items-center justify-between rounded-lg px-2 py-2 text-sm text-muted-foreground">
+            <span>Tema escuro</span>
+            <Switch checked={isDarkMode} onCheckedChange={onThemeToggle} aria-label="Alternar tema" />
+          </div>
           <button className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
             <User className="h-4 w-4" />
             Minha Conta
