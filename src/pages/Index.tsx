@@ -10,12 +10,14 @@ import { useItems } from '@/hooks/useItems';
 import { useAreas } from '@/hooks/useAreas';
 import { useTypes } from '@/hooks/useTypes';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const { items, addItem, updateItem, deleteItem, toggleStatus } = useItems();
   const { areas, addArea, updateArea, deleteArea, reorderAreas } = useAreas();
   const { types, addType, updateType, deleteType, reorderTypes } = useTypes();
   const { currentDate, setCurrentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
+  const isMobile = useIsMobile();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -78,13 +80,12 @@ const Index = () => {
   }, []);
 
   const handleToggleSidebar = useCallback(() => {
-    // On mobile, toggle drawer
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       setSidebarOpen(prev => !prev);
     } else {
       setSidebarCollapsed(prev => !prev);
     }
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
