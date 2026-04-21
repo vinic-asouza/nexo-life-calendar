@@ -60,43 +60,54 @@ export function ItemModal({
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      setMode(initialMode);
-      if (item) {
-        // Compute per-occurrence done state for recurring items
-        const isDoneForOcc = item.recurrence && occurrenceDate
-          ? (item.completedDates?.includes(occurrenceDate) ?? false)
-          : item.status === 'done';
-        setStatus(isDoneForOcc ? 'done' : 'pending');
-        setTitle(item.title);
-        setStartDate(item.startDate.split('T')[0]);
-        setEndDate(item.endDate?.split('T')[0] || '');
-        setAreaId(item.areaId);
-        setTypeId(item.typeId);
-        setRecurrenceType(item.recurrence?.type || '');
-        setCustomDays(item.recurrence?.customDays || []);
-        setNotes(item.notes || '');
-        setChecklist(item.checklist || []);
-        setComments(item.comments || []);
-        setShowMore(!!(item.recurrence || item.notes || item.endDate));
-      } else {
-        setTitle('');
-        setStartDate(initialDate || format(new Date(), 'yyyy-MM-dd'));
-        setEndDate('');
-        setAreaId(areas[0]?.id || '');
-        setTypeId(types[0]?.id || '');
-        setRecurrenceType('');
-        setCustomDays([]);
-        setNotes('');
-        setChecklist([]);
-        setComments([]);
-        setShowMore(false);
-      }
-      setNewChecklistText('');
-      setNewCommentText('');
-      setTimeout(() => titleRef.current?.focus(), 100);
+    if (!open) return;
+
+    setMode(initialMode);
+    if (item) {
+      const isDoneForOcc = item.recurrence && occurrenceDate
+        ? (item.completedDates?.includes(occurrenceDate) ?? false)
+        : item.status === 'done';
+      setStatus(isDoneForOcc ? 'done' : 'pending');
+      setTitle(item.title);
+      setStartDate(item.startDate.split('T')[0]);
+      setEndDate(item.endDate?.split('T')[0] || '');
+      setAreaId(item.areaId);
+      setTypeId(item.typeId);
+      setRecurrenceType(item.recurrence?.type || '');
+      setCustomDays(item.recurrence?.customDays || []);
+      setNotes(item.notes || '');
+      setChecklist(item.checklist || []);
+      setComments(item.comments || []);
+      setShowMore(!!(item.recurrence || item.notes || item.endDate));
+    } else {
+      setTitle('');
+      setStartDate(initialDate || format(new Date(), 'yyyy-MM-dd'));
+      setEndDate('');
+      setAreaId(areas[0]?.id || '');
+      setTypeId(types[0]?.id || '');
+      setRecurrenceType('');
+      setCustomDays([]);
+      setNotes('');
+      setChecklist([]);
+      setComments([]);
+      setShowMore(false);
     }
-  }, [open, item, initialMode, initialDate, occurrenceDate, areas, types]);
+    setNewChecklistText('');
+    setNewCommentText('');
+    setTimeout(() => titleRef.current?.focus(), 100);
+  }, [open, item, initialMode, initialDate, occurrenceDate]);
+
+  useEffect(() => {
+    if (!open || item) return;
+
+    if (!areaId && areas[0]?.id) {
+      setAreaId(areas[0].id);
+    }
+
+    if (!typeId && types[0]?.id) {
+      setTypeId(types[0].id);
+    }
+  }, [open, item, areaId, typeId, areas, types]);
 
   if (!open) return null;
 
