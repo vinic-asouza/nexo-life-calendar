@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { CalendarItem, Area, ItemType, FilterState } from '@/types';
 import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import {
@@ -21,30 +21,10 @@ interface DayCellDotsProps {
   areas: Area[];
   types: ItemType[];
   dateStr: string;
+  maxDots: number;
 }
 
-function DayCellDots({ dayItems, areas, types, dateStr }: DayCellDotsProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [maxDots, setMaxDots] = useState(20);
-
-  const updateMax = useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const dotSize = 12; // h-3 = 0.75rem = 12px
-    const gap = 3;
-    const w = el.clientWidth;
-    const h = el.clientHeight;
-    const dotsPerRow = Math.max(1, Math.floor((w + gap) / (dotSize + gap)));
-    const rows = Math.max(1, Math.floor((h + gap) / (dotSize + gap)));
-    setMaxDots(dotsPerRow * rows);
-  }, []);
-
-  useEffect(() => {
-    updateMax();
-    const observer = new ResizeObserver(updateMax);
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [updateMax]);
+function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsProps) {
 
   // Flatten all items sorted by area then type
   const allDots = useMemo(() => {
@@ -81,7 +61,7 @@ function DayCellDots({ dayItems, areas, types, dateStr }: DayCellDotsProps) {
   const visibleCount = hasOverflow ? maxDots - 1 : allDots.length;
 
   return (
-    <div ref={containerRef} className="mt-1.5 flex-1 overflow-hidden">
+    <div data-day-cell-dots className="mt-1.5 flex-1 overflow-hidden">
       <div className="flex items-start content-start gap-[3px] flex-wrap h-full">
         {allDots.slice(0, visibleCount).map(dot => (
           <span
