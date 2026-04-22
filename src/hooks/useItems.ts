@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { CalendarItem, FilterState } from '@/types';
-import { getItems, saveItems } from '@/services/storage';
+import { getItems, parseStoredItems, saveItems } from '@/services/storage';
 import { parseISO, startOfDay, getDay } from 'date-fns';
 
 const STORAGE_KEY = 'nexo_items';
@@ -21,12 +21,7 @@ export function useItems() {
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY || e.newValue === null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as CalendarItem[];
-        setItems(parsed);
-      } catch {
-        // ignore malformed payloads
-      }
+      setItems(parseStoredItems(e.newValue));
     };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
