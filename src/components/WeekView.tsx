@@ -7,19 +7,18 @@ import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCalendarData } from '@/context/CalendarDataContext';
 
 interface WeekViewProps {
   date: Date;
-  items: CalendarItem[];
-  areas: Area[];
-  types: ItemType[];
   filters: FilterState;
   onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
-export function WeekView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
+export function WeekView({ date, filters, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
+  const { items, areas, types } = useCalendarData();
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 

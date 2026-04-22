@@ -10,6 +10,7 @@ import { Plus, Eye, X, Check, ListChecks, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { useCalendarData } from '@/context/CalendarDataContext';
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -82,16 +83,14 @@ function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsPr
 
 interface MonthViewProps {
   date: Date;
-  items: CalendarItem[];
-  areas: Area[];
-  types: ItemType[];
   filters: FilterState;
   onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
-export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
+export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
+  const { items, areas, types } = useCalendarData();
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [maxDots, setMaxDots] = useState(20);

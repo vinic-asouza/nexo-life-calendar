@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useCalendarData } from '@/context/CalendarDataContext';
 
 const PRESET_COLORS = [
   '217 91% 60%', '37 92% 60%', '142 71% 45%', '340 82% 52%',
@@ -15,19 +16,9 @@ const PRESET_COLORS = [
 ];
 
 interface AppSidebarProps {
-  areas: Area[];
-  types: ItemType[];
   filters: FilterState;
   onToggleAreaFilter: (id: string) => void;
   onToggleTypeFilter: (id: string) => void;
-  onAddArea: (area: Omit<Area, 'id'>) => void;
-  onUpdateArea: (id: string, updates: Partial<Omit<Area, 'id'>>) => void;
-  onDeleteArea: (id: string) => void;
-  onReorderAreas: (fromIndex: number, toIndex: number) => void;
-  onAddType: (t: Omit<ItemType, 'id'>) => void;
-  onUpdateType: (id: string, updates: Partial<Omit<ItemType, 'id'>>) => void;
-  onDeleteType: (id: string) => void;
-  onReorderTypes: (fromIndex: number, toIndex: number) => void;
   open: boolean;
   collapsed: boolean;
   onClose: () => void;
@@ -36,14 +27,12 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({
-  areas, types, filters,
+  filters,
   onToggleAreaFilter, onToggleTypeFilter,
-  onAddArea, onUpdateArea, onDeleteArea, onReorderAreas,
-  onAddType, onUpdateType, onDeleteType,
-  onReorderTypes,
   open, collapsed, onClose,
   isDarkMode, onThemeToggle,
 }: AppSidebarProps) {
+  const { areas, types, addArea: onAddArea, updateArea: onUpdateArea, deleteArea: onDeleteArea, reorderAreas: onReorderAreas, addType: onAddType, updateType: onUpdateType, deleteType: onDeleteType, reorderTypes: onReorderTypes } = useCalendarData();
   const [areasOpen, setAreasOpen] = useState(true);
   const [typesOpen, setTypesOpen] = useState(true);
   const [newAreaName, setNewAreaName] = useState('');
