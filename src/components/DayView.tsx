@@ -8,19 +8,18 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
+import { useCalendarData } from '@/context/CalendarDataContext';
 
 interface DayViewProps {
   date: Date;
-  items: CalendarItem[];
-  areas: Area[];
-  types: ItemType[];
   filters: FilterState;
   onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
-export function DayView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: DayViewProps) {
+export function DayView({ date, filters, onItemClick, onAddItem, onToggleStatus }: DayViewProps) {
+  const { items, areas, types } = useCalendarData();
   const dayItems = getItemsForDate(items, date, filters);
   const dateStr = format(date, 'yyyy-MM-dd');
 
