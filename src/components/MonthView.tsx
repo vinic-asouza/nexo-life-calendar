@@ -93,6 +93,8 @@ interface MonthViewProps {
 
 export function MonthView({ date, items, areas, types, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [maxDots, setMaxDots] = useState(20);
 
   const monthStart = startOfMonth(date);
   const monthEnd = endOfMonth(date);
@@ -102,6 +104,28 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
   const numWeeks = days.length / 7;
 
   const WEEKDAY_LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+  useEffect(() => {
+    const updateMaxDots = () => {
+      const sampleCell = gridRef.current?.querySelector<HTMLElement>('[data-day-cell-dots]');
+      if (!sampleCell) return;
+
+      const dotSize = 12;
+      const gap = 3;
+      const width = sampleCell.clientWidth;
+      const height = sampleCell.clientHeight;
+      const dotsPerRow = Math.max(1, Math.floor((width + gap) / (dotSize + gap)));
+      const rows = Math.max(1, Math.floor((height + gap) / (dotSize + gap)));
+      setMaxDots(dotsPerRow * rows);
+    };
+
+    updateMaxDots();
+
+    const observer = new ResizeObserver(updateMaxDots);
+    if (gridRef.current) observer.observe(gridRef.current);
+
+    return () => observer.disconnect();
+  }, [numWeeks]);
 
   const itemsByDate = useMemo(() => {
     const cache = new Map<string, CalendarItem[]>();
@@ -148,7 +172,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
-      <div className="grid grid-cols-7 gap-px bg-border flex-1" style={{ gridTemplateRows: `auto repeat(${numWeeks}, 1fr)` }}>
+      <div ref={gridRef} className="grid grid-cols-7 gap-px bg-border flex-1" style={{ gridTemplateRows: `auto repeat(${numWeeks}, 1fr)` }}>
         {WEEKDAY_LABELS.map(d => (
           <div key={d} className="bg-muted/50 px-2 py-2 text-center text-[10px] font-semibold uppercase text-muted-foreground">
             {d}
@@ -196,7 +220,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
                 )}
               </div>
 
-              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} />
+              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} maxDots={maxDots} />
             </div>
           );
         })}
