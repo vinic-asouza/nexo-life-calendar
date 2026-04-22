@@ -166,8 +166,8 @@ export function AppSidebar({
         <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm md:hidden" onClick={onClose} />
       )}
 
-      <aside className={cn(
-        'fixed left-0 top-0 z-50 flex h-full flex-col border-r bg-card transition-all duration-300 md:relative md:z-auto md:translate-x-0 md:flex overflow-hidden',
+        <aside className={cn(
+          'fixed left-0 top-0 z-50 flex h-full flex-col border-r bg-background transition-all duration-300 md:relative md:z-auto md:translate-x-0 md:flex overflow-hidden',
         open ? 'translate-x-0 w-60' : '-translate-x-full md:translate-x-0',
         !open && sidebarWidth
       )}>
