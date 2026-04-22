@@ -64,7 +64,7 @@ export function Header({
   })();
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b px-4 py-3 md:px-6 bg-card/70 backdrop-blur-xl backdrop-saturate-150">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b px-4 py-3 md:px-6 bg-background/95 backdrop-blur-xl backdrop-saturate-150">
       {/* Left: Logo + sidebar toggle */}
       <div className="flex items-center gap-3 min-w-[140px]">
         <button onClick={onToggleSidebar} className="hidden md:flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
