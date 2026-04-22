@@ -14,6 +14,13 @@ type StorageEnvelope<T> = {
   data: T;
 };
 
+type IdleScheduler = typeof window & {
+  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+const pendingWrites = new Map<string, { idleId?: number; timeoutId?: number }>();
+
 function isEnvelope<T>(value: unknown): value is StorageEnvelope<T> {
   return typeof value === 'object' && value !== null && 'version' in value && 'data' in value;
 }
@@ -78,15 +85,55 @@ function normalizeItems(value: unknown): CalendarItem[] {
     });
 }
 
-function getVersioned<T>(key: string, fallback: T, migrate: (value: unknown, version: number) => T): T {
+function parseVersioned<T>(raw: string | null, fallback: T, migrate: (value: unknown, version: number) => T): T {
   try {
-    const raw = localStorage.getItem(key);
     if (!raw) return fallback;
 
     const parsed = JSON.parse(raw);
     const version = isEnvelope<T>(parsed) ? parsed.version : 0;
     const source = isEnvelope<T>(parsed) ? parsed.data : parsed;
-    const migrated = migrate(source, version);
+    return migrate(source, version);
+  } catch {
+    return fallback;
+  }
+}
+
+function scheduleSetItem(key: string, value: string): void {
+  if (typeof window === 'undefined') {
+    localStorage.setItem(key, value);
+    return;
+  }
+
+  const runtime = window as IdleScheduler;
+  const existing = pendingWrites.get(key);
+  if (existing?.timeoutId) window.clearTimeout(existing.timeoutId);
+  if (existing?.idleId && runtime.cancelIdleCallback) runtime.cancelIdleCallback(existing.idleId);
+
+  let flushed = false;
+  const flush = () => {
+    if (flushed) return;
+    flushed = true;
+    localStorage.setItem(key, value);
+    pendingWrites.delete(key);
+  };
+
+  const timeoutId = window.setTimeout(flush, 150);
+  const idleId = runtime.requestIdleCallback?.(() => {
+    window.clearTimeout(timeoutId);
+    flush();
+  }, { timeout: 300 });
+
+  pendingWrites.set(key, { timeoutId, idleId });
+}
+
+function getVersioned<T>(key: string, fallback: T, migrate: (value: unknown, version: number) => T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    const migrated = parseVersioned(raw, fallback, migrate);
+
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw);
 
     if (!isEnvelope<T>(parsed) || parsed.version !== STORAGE_SCHEMA_VERSION) {
       set(key, migrated);
@@ -104,8 +151,12 @@ function get<T>(key: string, fallback: T): T {
 
 function set<T>(key: string, value: T): void {
   const payload: StorageEnvelope<T> = { version: STORAGE_SCHEMA_VERSION, data: value };
-  localStorage.setItem(key, JSON.stringify(payload));
+  scheduleSetItem(key, JSON.stringify(payload));
 }
+
+export const parseStoredAreas = (raw: string | null): Area[] => parseVersioned(raw, DEFAULT_AREAS, value => value as Area[]);
+export const parseStoredTypes = (raw: string | null): ItemType[] => parseVersioned(raw, DEFAULT_TYPES, value => value as ItemType[]);
+export const parseStoredItems = (raw: string | null): CalendarItem[] => parseVersioned(raw, [], normalizeItems);
 
 // Areas
 export const getAreas = (): Area[] => get(KEYS.areas, DEFAULT_AREAS);

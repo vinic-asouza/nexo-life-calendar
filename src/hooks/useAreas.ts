@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Area } from '@/types';
-import { getAreas, saveAreas } from '@/services/storage';
+import { getAreas, parseStoredAreas, saveAreas } from '@/services/storage';
 
 const STORAGE_KEY = 'nexo_areas';
 
@@ -18,11 +18,7 @@ export function useAreas() {
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY || e.newValue === null) return;
-      try {
-        setAreas(JSON.parse(e.newValue) as Area[]);
-      } catch {
-        // ignore
-      }
+      setAreas(parseStoredAreas(e.newValue));
     };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);

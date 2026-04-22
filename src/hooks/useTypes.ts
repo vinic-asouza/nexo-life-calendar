@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { ItemType } from '@/types';
-import { getTypes, saveTypes } from '@/services/storage';
+import { getTypes, parseStoredTypes, saveTypes } from '@/services/storage';
 
 const STORAGE_KEY = 'nexo_types';
 
@@ -18,11 +18,7 @@ export function useTypes() {
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY || e.newValue === null) return;
-      try {
-        setTypes(JSON.parse(e.newValue) as ItemType[]);
-      } catch {
-        // ignore
-      }
+      setTypes(parseStoredTypes(e.newValue));
     };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
