@@ -123,7 +123,22 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
 
   const WEEKDAY_LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
-  const viewDayItems = viewDayModal ? getItemsForDate(items, parseLocalDate(viewDayModal), filters) : [];
+  const itemsByDate = useMemo(() => {
+    const cache = new Map<string, CalendarItem[]>();
+
+    for (const day of days) {
+      const dateStr = format(day, 'yyyy-MM-dd');
+      cache.set(dateStr, getItemsForDate(items, day, filters));
+    }
+
+    if (viewDayModal && !cache.has(viewDayModal)) {
+      cache.set(viewDayModal, getItemsForDate(items, parseLocalDate(viewDayModal), filters));
+    }
+
+    return cache;
+  }, [days, items, filters, viewDayModal]);
+
+  const viewDayItems = viewDayModal ? (itemsByDate.get(viewDayModal) ?? []) : [];
 
   const viewDayGrouped = useMemo(() => {
     if (!viewDayModal) return [];
@@ -164,7 +179,7 @@ export function MonthView({ date, items, areas, types, filters, onItemClick, onA
           const key = format(day, 'yyyy-MM-dd');
           const inMonth = isSameMonth(day, date);
           const today = isToday(day);
-          const dayItems = getItemsForDate(items, day, filters);
+          const dayItems = itemsByDate.get(key) ?? [];
           const MAX_VISIBLE = 5;
 
           return (
