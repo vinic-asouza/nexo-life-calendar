@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
+import { useCalendarData } from '@/context/CalendarDataContext';
 
 // Parse YYYY-MM-DD as local-time midnight (avoids UTC offset shift).
 const parseLocalDate = (dateStr: string) => parseISO(dateStr.length === 10 ? `${dateStr}T00:00:00` : dateStr);
@@ -26,8 +27,6 @@ const RECURRENCE_LABELS: Record<RecurrenceType, string> = {
 interface ItemModalProps {
   open: boolean;
   onClose: () => void;
-  areas: Area[];
-  types: ItemType[];
   initialDate?: string;
   occurrenceDate?: string;
   item?: CalendarItem | null;
@@ -39,9 +38,10 @@ interface ItemModalProps {
 }
 
 export function ItemModal({
-  open, onClose, areas, types, initialDate, occurrenceDate, item, mode: initialMode,
+  open, onClose, initialDate, occurrenceDate, item, mode: initialMode,
   onSave, onUpdate, onDelete, onToggleStatus,
 }: ItemModalProps) {
+  const { areas, types } = useCalendarData();
   const [mode, setMode] = useState(initialMode);
   const [status, setStatus] = useState<'pending' | 'done'>(item?.status || 'pending');
   const [title, setTitle] = useState('');
