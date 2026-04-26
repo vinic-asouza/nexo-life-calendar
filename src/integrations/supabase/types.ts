@@ -14,7 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      areas: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      items: {
+        Row: {
+          area_id: string | null
+          checklist: Json
+          comments: Json
+          completed_dates: string[]
+          created_at: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          recurrence: Json | null
+          start_date: string
+          status: string
+          title: string
+          type_id: string | null
+          user_id: string
+        }
+        Insert: {
+          area_id?: string | null
+          checklist?: Json
+          comments?: Json
+          completed_dates?: string[]
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          recurrence?: Json | null
+          start_date: string
+          status?: string
+          title: string
+          type_id?: string | null
+          user_id: string
+        }
+        Update: {
+          area_id?: string | null
+          checklist?: Json
+          comments?: Json
+          completed_dates?: string[]
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          recurrence?: Json | null
+          start_date?: string
+          status?: string
+          title?: string
+          type_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
