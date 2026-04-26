@@ -1,51 +1,49 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { Area } from '@/types';
-import { getAreas, parseStoredAreas, saveAreas } from '@/services/storage';
+import { repositories } from '@/repositories';
+import { useAuth } from '@/context/AuthContext';
 
-const STORAGE_KEY = 'nexo_areas';
+const QK = ['areas'] as const;
 
 export function useAreas() {
-  const [areas, setAreas] = useState<Area[]>(getAreas);
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const key = [...QK, user?.id];
 
-  const mutate = useCallback((updater: (prev: Area[]) => Area[]) => {
-    setAreas(prev => {
-      const next = updater(prev);
-      saveAreas(next);
-      return next;
-    });
-  }, []);
+  const { data: areas = [] } = useQuery({
+    queryKey: key,
+    queryFn: () => repositories.areas.list(),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEY || e.newValue === null) return;
-      setAreas(parseStoredAreas(e.newValue));
-    };
-    window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
-  }, []);
+  const invalidate = () => qc.invalidateQueries({ queryKey: key });
 
-  const addArea = useCallback((area: Omit<Area, 'id'>) => {
-    const newArea: Area = { ...area, id: `area-${Date.now()}` };
-    mutate(prev => [...prev, newArea]);
-    return newArea;
-  }, [mutate]);
+  const addArea = useCallback(async (area: Omit<Area, 'id'>) => {
+    const created = await repositories.areas.create(area);
+    qc.setQueryData<Area[]>(key, (prev = []) => [...prev, created]);
+    return created;
+  }, [qc, key]);
 
-  const updateArea = useCallback((id: string, updates: Partial<Omit<Area, 'id'>>) => {
-    mutate(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
-  }, [mutate]);
+  const updateArea = useCallback(async (id: string, updates: Partial<Omit<Area, 'id'>>) => {
+    qc.setQueryData<Area[]>(key, (prev = []) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a)));
+    try { await repositories.areas.update(id, updates); } finally { invalidate(); }
+  }, [qc, key]);
 
-  const deleteArea = useCallback((id: string) => {
-    mutate(prev => prev.filter(a => a.id !== id));
-  }, [mutate]);
+  const deleteArea = useCallback(async (id: string) => {
+    qc.setQueryData<Area[]>(key, (prev = []) => prev.filter((a) => a.id !== id));
+    try { await repositories.areas.remove(id); } finally { invalidate(); }
+  }, [qc, key]);
 
-  const reorderAreas = useCallback((fromIndex: number, toIndex: number) => {
-    mutate(prev => {
-      const next = [...prev];
-      const [moved] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, moved);
-      return next;
-    });
-  }, [mutate]);
+  const reorderAreas = useCallback(async (fromIndex: number, toIndex: number) => {
+    const current = qc.getQueryData<Area[]>(key) ?? [];
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    qc.setQueryData<Area[]>(key, next);
+    try { await repositories.areas.reorder(next.map((a) => a.id)); } finally { invalidate(); }
+  }, [qc, key]);
 
   return { areas, addArea, updateArea, deleteArea, reorderAreas };
 }

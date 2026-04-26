@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plus, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, PanelLeftClose, PanelLeft, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ViewMode } from '@/types';
 import { format, startOfMonth, startOfWeek } from 'date-fns';
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
   currentDate: Date;
@@ -40,6 +41,7 @@ export function Header({
   sidebarCollapsed,
 }: HeaderProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const calendarDate = (() => {
     switch (viewMode) {
@@ -163,6 +165,17 @@ export function Header({
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Novo</span>
         </Button>
+        {user && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => signOut()}
+            title={user.email ?? 'Sair'}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </header>
   );
