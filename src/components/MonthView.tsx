@@ -6,7 +6,8 @@ import {
   eachDayOfInterval, isSameMonth, isToday,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Eye, X, Check, ListChecks, MessageSquare } from 'lucide-react';
+import { Plus, Eye, X, ListChecks, MessageSquare } from 'lucide-react';
+import { CheckIndicator } from '@/components/ui/check-indicator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -274,18 +275,12 @@ export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatu
                             if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
                           }}
                         >
-                          <button
+                          <CheckIndicator
+                            size="md"
+                            done={isDone}
+                            color={area?.color}
                             onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
-                            className={cn(
-                              'flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 transition-colors',
-                              isDone
-                                ? 'border-transparent'
-                                : 'border-muted-foreground/40 hover:border-primary'
-                            )}
-                            style={isDone && area ? { backgroundColor: `hsl(${area.color})`, borderColor: `hsl(${area.color})` } : undefined}
-                          >
-                            {isDone && <Check className="h-3 w-3 text-primary-foreground" />}
-                          </button>
+                          />
 
                           <div className="flex-1 min-w-0">
                             <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
