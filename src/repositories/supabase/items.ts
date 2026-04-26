@@ -84,9 +84,10 @@ export const supabaseItems: ItemsRepository = {
 
   async create(item) {
     const user_id = await getUserId();
+    const insertRow = { user_id, start_date: item.startDate, title: item.title, ...toRow(item) } as never;
     const { data, error } = await supabase
       .from('items')
-      .insert({ user_id, ...toRow(item) })
+      .insert(insertRow)
       .select(SELECT)
       .single();
     if (error) throw error;
@@ -94,7 +95,7 @@ export const supabaseItems: ItemsRepository = {
   },
 
   async update(id, updates) {
-    const { error } = await supabase.from('items').update(toRow(updates)).eq('id', id);
+    const { error } = await supabase.from('items').update(toRow(updates) as never).eq('id', id);
     if (error) throw error;
   },
 
