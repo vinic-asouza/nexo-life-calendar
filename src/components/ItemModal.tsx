@@ -266,15 +266,7 @@ export function ItemModal({
               <div className="space-y-1 mb-2">
                 {checklist.map(cl => (
                   <div key={cl.id} className="flex items-center gap-2 group">
-                    <button
-                      onClick={() => toggleChecklistItem(cl.id)}
-                      className={cn(
-                        'flex h-4 w-4 shrink-0 items-center justify-center rounded-[0.25rem] border transition-colors',
-                        cl.done ? 'bg-primary border-primary' : 'border-muted-foreground/40 hover:border-primary'
-                      )}
-                    >
-                      {cl.done && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
-                    </button>
+                    <CheckIndicator size="sm" done={cl.done} onClick={() => toggleChecklistItem(cl.id)} />
                     <span className={cn('text-sm flex-1', cl.done && 'text-muted-foreground line-through')}>{cl.text}</span>
                     <button
                       onClick={() => removeChecklistItem(cl.id)}
@@ -461,16 +453,7 @@ export function ItemModal({
                   <div className="space-y-1 mt-1 mb-2">
                     {checklist.map(cl => (
                       <div key={cl.id} className="flex items-center gap-2 group">
-                        <button
-                          type="button"
-                          onClick={() => toggleChecklistItem(cl.id)}
-                          className={cn(
-                            'flex h-4 w-4 shrink-0 items-center justify-center rounded-[0.25rem] border transition-colors',
-                            cl.done ? 'bg-primary border-primary' : 'border-muted-foreground/40 hover:border-primary'
-                          )}
-                        >
-                          {cl.done && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
-                        </button>
+                        <CheckIndicator size="sm" done={cl.done} onClick={() => toggleChecklistItem(cl.id)} />
                         <span className={cn('text-sm flex-1', cl.done && 'text-muted-foreground line-through')}>{cl.text}</span>
                         <button type="button" onClick={() => removeChecklistItem(cl.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
                           <X className="h-3 w-3" />
