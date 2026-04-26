@@ -18,7 +18,7 @@ const indicatorVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-4 w-4 rounded-[0.25rem] border',
+        sm: 'h-4 w-4 rounded-sm border',
         md: 'h-5 w-5 rounded-lg border-2',
       },
       done: {
