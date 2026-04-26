@@ -6,7 +6,8 @@ import {
   eachDayOfInterval, isSameMonth, isToday,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Eye, X, Check, ListChecks, MessageSquare } from 'lucide-react';
+import { Plus, Eye, X, ListChecks, MessageSquare } from 'lucide-react';
+import { CheckIndicator } from '@/components/ui/check-indicator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';

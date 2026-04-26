@@ -13,6 +13,7 @@ import { useCalendarData } from '@/context/CalendarDataContext';
 // Parse YYYY-MM-DD as local-time midnight (avoids UTC offset shift).
 const parseLocalDate = (dateStr: string) => parseISO(dateStr.length === 10 ? `${dateStr}T00:00:00` : dateStr);
 import { Separator } from '@/components/ui/separator';
+import { CheckIndicator } from '@/components/ui/check-indicator';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
