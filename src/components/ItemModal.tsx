@@ -201,7 +201,7 @@ export function ItemModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={onClose}>
       <div className="fixed inset-0 bg-[hsl(var(--overlay)/0.68)] backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-[0.75rem] bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-6 shadow-xl sm:rounded-[0.75rem] animate-in slide-in-from-bottom-4 duration-300"
+        className="relative z-10 w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-6 shadow-xl sm:rounded-lg animate-in slide-in-from-bottom-4 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -231,12 +231,12 @@ export function ItemModal({
 
             <div className="flex flex-wrap gap-2">
               {area && (
-                <span className="inline-flex items-center gap-1.5 rounded-[0.75rem] px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
+                <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
                   {area.name}
                 </span>
               )}
               {type && (
-                <span className="inline-flex items-center rounded-[0.75rem] bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                   {type.name}
                 </span>
               )}
@@ -249,7 +249,7 @@ export function ItemModal({
             )}
 
             {item.notes && (
-              <div className="rounded-[0.75rem] bg-muted/50 p-3">
+              <div className="rounded-lg bg-muted/50 p-3">
                 <p className="text-sm text-muted-foreground">{item.notes}</p>
               </div>
             )}
@@ -305,7 +305,7 @@ export function ItemModal({
 
               <div className="space-y-2 mb-2">
                 {comments.map(cm => (
-                  <div key={cm.id} className="rounded-[0.75rem] bg-muted/50 p-2.5 group relative">
+                  <div key={cm.id} className="rounded-lg bg-muted/50 p-2.5 group relative">
                     <p className="text-sm">{cm.text}</p>
                     <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(cm.createdAt), 'dd/MM/yyyy HH:mm')}</p>
                     <button
@@ -428,7 +428,7 @@ export function ItemModal({
                         type="button"
                         onClick={() => setCustomDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
                         className={cn(
-                          'h-8 w-8 rounded-[0.75rem] text-xs font-medium transition-colors',
+                          'h-8 w-8 rounded-lg text-xs font-medium transition-colors',
                           customDays.includes(i) ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         )}
                       >
