@@ -34,8 +34,22 @@ const toDomain = (r: ItemRow): CalendarItem => ({
   createdAt: r.created_at,
 });
 
-const toRow = (item: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>) => {
-  const row: Record<string, unknown> = {};
+type RowPatch = {
+  title?: string;
+  start_date?: string;
+  end_date?: string | null;
+  area_id?: string | null;
+  type_id?: string | null;
+  recurrence?: Recurrence | null;
+  notes?: string | null;
+  status?: 'pending' | 'done';
+  completed_dates?: string[];
+  checklist?: ChecklistItem[];
+  comments?: Comment[];
+};
+
+const toRow = (item: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>): RowPatch => {
+  const row: RowPatch = {};
   if (item.title !== undefined) row.title = item.title;
   if (item.startDate !== undefined) row.start_date = item.startDate;
   if ('endDate' in item) row.end_date = item.endDate ?? null;
