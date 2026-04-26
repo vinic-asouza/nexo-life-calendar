@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plus, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, PanelLeftClose, PanelLeft, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ViewMode } from '@/types';
 import { format, startOfMonth, startOfWeek } from 'date-fns';
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
   currentDate: Date;
