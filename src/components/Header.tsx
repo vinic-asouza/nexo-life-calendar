@@ -41,6 +41,7 @@ export function Header({
   sidebarCollapsed,
 }: HeaderProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const calendarDate = (() => {
     switch (viewMode) {
@@ -164,6 +165,17 @@ export function Header({
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Novo</span>
         </Button>
+        {user && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => signOut()}
+            title={user.email ?? 'Sair'}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </header>
   );
