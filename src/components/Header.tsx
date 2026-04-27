@@ -41,6 +41,7 @@ export function Header({
   sidebarCollapsed,
 }: HeaderProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [displayMonth, setDisplayMonth] = useState(currentDate);
   const { user, signOut } = useAuth();
 
   const calendarDate = (() => {
@@ -90,7 +91,13 @@ export function Header({
           <Button variant="ghost" size="icon" onClick={onPrev} className="h-8 w-8">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+          <Popover
+            open={calendarOpen}
+            onOpenChange={(open) => {
+              setCalendarOpen(open);
+              if (open) setDisplayMonth(calendarDate);
+            }}
+          >
             <PopoverTrigger asChild>
               <button className="min-w-[140px] text-center text-sm font-medium capitalize hover:text-primary transition-colors md:min-w-[180px] md:text-base">
                 {dateLabel}
@@ -100,7 +107,8 @@ export function Header({
             <Calendar
               mode="single"
               selected={calendarDate}
-              month={calendarDate}
+              month={displayMonth}
+              onMonthChange={setDisplayMonth}
               onSelect={(date) => {
                 if (date) {
                   onDateSelect(
