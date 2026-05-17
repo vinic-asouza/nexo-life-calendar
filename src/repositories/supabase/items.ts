@@ -7,6 +7,8 @@ type ItemRow = {
   title: string;
   start_date: string;
   end_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
   area_id: string | null;
   type_id: string | null;
   recurrence: Recurrence | null;
@@ -23,6 +25,8 @@ const toDomain = (r: ItemRow): CalendarItem => ({
   title: r.title,
   startDate: r.start_date,
   endDate: r.end_date ?? undefined,
+  startTime: r.start_time ? r.start_time.slice(0, 5) : undefined,
+  endTime: r.end_time ? r.end_time.slice(0, 5) : undefined,
   areaId: r.area_id ?? '',
   typeId: r.type_id ?? '',
   recurrence: r.recurrence ?? undefined,
@@ -38,6 +42,8 @@ type RowPatch = {
   title?: string;
   start_date?: string;
   end_date?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
   area_id?: string | null;
   type_id?: string | null;
   recurrence?: Recurrence | null;
@@ -53,6 +59,8 @@ const toRow = (item: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>): RowPatch 
   if (item.title !== undefined) row.title = item.title;
   if (item.startDate !== undefined) row.start_date = item.startDate;
   if ('endDate' in item) row.end_date = item.endDate ?? null;
+  if ('startTime' in item) row.start_time = item.startTime ?? null;
+  if ('endTime' in item) row.end_time = item.endTime ?? null;
   if (item.areaId !== undefined) row.area_id = item.areaId || null;
   if (item.typeId !== undefined) row.type_id = item.typeId || null;
   if ('recurrence' in item) row.recurrence = item.recurrence ?? null;
@@ -70,7 +78,7 @@ async function getUserId(): Promise<string> {
   return data.user.id;
 }
 
-const SELECT = 'id, title, start_date, end_date, area_id, type_id, recurrence, notes, status, completed_dates, checklist, comments, created_at';
+const SELECT = 'id, title, start_date, end_date, start_time, end_time, area_id, type_id, recurrence, notes, status, completed_dates, checklist, comments, created_at';
 
 export const supabaseItems: ItemsRepository = {
   async list() {

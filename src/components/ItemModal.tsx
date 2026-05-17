@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send } from 'lucide-react';
+import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock } from 'lucide-react';
 import { CalendarItem, Area, ItemType, RecurrenceType, ChecklistItem, Comment } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,8 @@ export function ItemModal({
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(initialDate || format(new Date(), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [areaId, setAreaId] = useState(areas[0]?.id || '');
   const [typeId, setTypeId] = useState(types[0]?.id || '');
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType | ''>('');
@@ -72,6 +74,8 @@ export function ItemModal({
       setTitle(item.title);
       setStartDate(item.startDate.split('T')[0]);
       setEndDate(item.endDate?.split('T')[0] || '');
+      setStartTime(item.startTime || '');
+      setEndTime(item.endTime || '');
       setAreaId(item.areaId);
       setTypeId(item.typeId);
       setRecurrenceType(item.recurrence?.type || '');
@@ -84,6 +88,8 @@ export function ItemModal({
       setTitle('');
       setStartDate(initialDate || format(new Date(), 'yyyy-MM-dd'));
       setEndDate('');
+      setStartTime('');
+      setEndTime('');
       setAreaId(areas[0]?.id || '');
       setTypeId(types[0]?.id || '');
       setRecurrenceType('');
@@ -118,6 +124,8 @@ export function ItemModal({
       title: title.trim(),
       startDate,
       endDate: endDate || undefined,
+      startTime: startTime || undefined,
+      endTime: startTime && endTime ? endTime : undefined,
       areaId,
       typeId,
       recurrence: recurrenceType
@@ -244,6 +252,13 @@ export function ItemModal({
 
             <p className="text-sm text-muted-foreground">{format(parseLocalDate(item.startDate), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(parseLocalDate(item.endDate), 'dd/MM/yyyy')}` : ''}</p>
 
+            {item.startTime && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                {item.endTime ? `${item.startTime} – ${item.endTime}` : item.startTime}
+              </p>
+            )}
+
             {item.recurrence && (
               <p className="text-sm text-muted-foreground">🔄 {RECURRENCE_LABELS[item.recurrence.type]}</p>
             )}
@@ -354,11 +369,38 @@ export function ItemModal({
               className="text-lg font-medium placeholder:text-muted-foreground/50"
             />
 
+            <div>
+              <Label className="text-xs text-muted-foreground">Data</Label>
+              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground">Data</Label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
+                <Label className="text-xs text-muted-foreground">Hora início</Label>
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setStartTime(v);
+                    if (!v) setEndTime('');
+                  }}
+                  className="mt-1 h-9 text-sm"
+                />
               </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Hora fim</Label>
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={e => setEndTime(e.target.value)}
+                  disabled={!startTime}
+                  className="mt-1 h-9 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground">Área</Label>
                 <Select value={areaId} onValueChange={setAreaId}>
@@ -377,21 +419,21 @@ export function ItemModal({
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Tipo</Label>
+                <Select value={typeId} onValueChange={setTypeId}>
+                  <SelectTrigger className="mt-1 h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
+                    {types.map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
-              <Label className="text-xs text-muted-foreground">Tipo</Label>
-              <Select value={typeId} onValueChange={setTypeId}>
-                <SelectTrigger className="mt-1 h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
-                  {types.map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             {/* Progressive disclosure */}
             {!showMore ? (

@@ -49,10 +49,12 @@ export type Database = {
           completed_dates: string[]
           created_at: string
           end_date: string | null
+          end_time: string | null
           id: string
           notes: string | null
           recurrence: Json | null
           start_date: string
+          start_time: string | null
           status: string
           title: string
           type_id: string | null
@@ -65,10 +67,12 @@ export type Database = {
           completed_dates?: string[]
           created_at?: string
           end_date?: string | null
+          end_time?: string | null
           id?: string
           notes?: string | null
           recurrence?: Json | null
           start_date: string
+          start_time?: string | null
           status?: string
           title: string
           type_id?: string | null
@@ -81,10 +85,12 @@ export type Database = {
           completed_dates?: string[]
           created_at?: string
           end_date?: string | null
+          end_time?: string | null
           id?: string
           notes?: string | null
           recurrence?: Json | null
           start_date?: string
+          start_time?: string | null
           status?: string
           title?: string
           type_id?: string | null

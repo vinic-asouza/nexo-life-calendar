@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { CalendarItem, Area, ItemType, FilterState } from '@/types';
+import { CalendarItem, Area, ItemType, FilterState, GroupingMode } from '@/types';
 import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { useCalendarData } from '@/context/CalendarDataContext';
+import { formatItemTime, groupItemsByType, sortItemsChronologically, compareByTime } from '@/lib/itemSort';
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -24,12 +25,24 @@ interface DayCellDotsProps {
   types: ItemType[];
   dateStr: string;
   maxDots: number;
+  grouping: GroupingMode;
 }
 
-function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsProps) {
-
-  // Flatten all items sorted by area then type
+function DayCellDots({ dayItems, areas, types, dateStr, maxDots, grouping }: DayCellDotsProps) {
   const allDots = useMemo(() => {
+    if (grouping === 'time') {
+      const sorted = sortItemsChronologically(dayItems);
+      return sorted.map(item => {
+        const area = areas.find(a => a.id === item.areaId);
+        const done = isItemDoneOnDate(item, dateStr);
+        return {
+          id: item.id,
+          color: area
+            ? `hsl(${area.color} / ${done ? 0.3 : 0.8})`
+            : `hsl(var(--muted-foreground) / ${done ? 0.2 : 0.5})`,
+        };
+      });
+    }
     const areaGroups = new Map<string, { area: Area | undefined; items: CalendarItem[] }>();
     dayItems.forEach(item => {
       const group = areaGroups.get(item.areaId);
@@ -57,7 +70,7 @@ function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsPr
         };
       });
     });
-  }, [dayItems, areas, types, dateStr]);
+  }, [dayItems, areas, types, dateStr, grouping]);
 
   const hasOverflow = allDots.length > maxDots;
   const visibleCount = hasOverflow ? maxDots - 1 : allDots.length;
@@ -85,12 +98,13 @@ function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsPr
 interface MonthViewProps {
   date: Date;
   filters: FilterState;
+  grouping: GroupingMode;
   onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
-export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
+export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
   const { items, areas, types } = useCalendarData();
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -144,31 +158,14 @@ export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatu
 
   const viewDayItems = viewDayModal ? (itemsByDate.get(viewDayModal) ?? []) : [];
 
-  const viewDayGrouped = useMemo(() => {
-    if (!viewDayModal) return [];
-    const groups: { type: ItemType | undefined; items: CalendarItem[] }[] = [];
-    const typeMap = new Map<string, CalendarItem[]>();
-    viewDayItems.forEach(item => {
-      const existing = typeMap.get(item.typeId);
-      if (existing) existing.push(item);
-      else typeMap.set(item.typeId, [item]);
-    });
-    types.forEach(t => {
-      const items = typeMap.get(t.id);
-      if (items) {
-        items.sort((a, b) => {
-          const ai = areas.findIndex(ar => ar.id === a.areaId);
-          const bi = areas.findIndex(ar => ar.id === b.areaId);
-          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-        });
-        groups.push({ type: t, items });
-      }
-    });
-    typeMap.forEach((items, typeId) => {
-      if (!types.find(t => t.id === typeId)) groups.push({ type: undefined, items });
-    });
-    return groups;
-  }, [viewDayItems, types, viewDayModal]);
+  const viewDayGrouped = useMemo(
+    () => viewDayModal && grouping === 'type' ? groupItemsByType(viewDayItems, types, areas) : [],
+    [viewDayItems, types, areas, viewDayModal, grouping]
+  );
+  const viewDayTimeSorted = useMemo(
+    () => viewDayModal && grouping === 'time' ? sortItemsChronologically(viewDayItems) : [],
+    [viewDayItems, viewDayModal, grouping]
+  );
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
@@ -220,7 +217,7 @@ export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatu
                 )}
               </div>
 
-              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} maxDots={maxDots} />
+              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} maxDots={maxDots} grouping={grouping} />
             </div>
           );
         })}
@@ -244,70 +241,70 @@ export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatu
             </div>
 
             <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-              {viewDayGrouped.length === 0 && (
+              {viewDayItems.length === 0 && (
                 <p className="text-sm text-muted-foreground py-4 text-center">Nenhum item neste dia</p>
               )}
-              {viewDayGrouped.map(group => (
-                <div key={group.type?.id || 'unknown'}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {group.type?.name || 'Sem tipo'}
-                    </span>
-                    <Separator className="flex-1" />
-                  </div>
-                  <div className="space-y-1">
-                    {group.items.map(item => {
-                      const area = areas.find(a => a.id === item.areaId);
-                      const isDone = isItemDoneOnDate(item, viewDayModal);
-                      return (
-                        <div
-                          key={item.id}
-                          onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
-                          className={cn(
-                            'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
-                            isDone && 'opacity-60'
-                          )}
-                          style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                          onMouseEnter={e => {
-                            if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
-                          }}
-                          onMouseLeave={e => {
-                            if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
-                          }}
-                        >
-                          <CheckIndicator
-                            size="md"
-                            done={isDone}
-                            color={area?.color}
-                            onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
-                          />
 
-                          <div className="flex-1 min-w-0">
-                            <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
-                              {item.title}
-                            </p>
-                          </div>
+              {(() => {
+                const renderItem = (item: CalendarItem) => {
+                  const area = areas.find(a => a.id === item.areaId);
+                  const isDone = isItemDoneOnDate(item, viewDayModal);
+                  const time = formatItemTime(item);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
+                      className={cn(
+                        'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                        isDone && 'opacity-60'
+                      )}
+                      style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                      onMouseEnter={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`; }}
+                      onMouseLeave={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`; }}
+                    >
+                      <CheckIndicator
+                        size="md"
+                        done={isDone}
+                        color={area?.color}
+                        onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
+                      />
+                      <span className="text-xs tabular-nums text-muted-foreground w-20 shrink-0">{time ?? '—'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>{item.title}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.checklist && item.checklist.length > 0 && (
+                          <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                        {item.comments && item.comments.length > 0 && (
+                          <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                        {area && (
+                          <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
+                            style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
+                            {area.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                };
 
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {item.checklist && item.checklist.length > 0 && (
-                              <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
-                            {item.comments && item.comments.length > 0 && (
-                              <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
-                            {area && (
-                              <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
-                                style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
-                                {area.name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                if (grouping === 'time') {
+                  return <div className="space-y-1">{viewDayTimeSorted.map(renderItem)}</div>;
+                }
+                return viewDayGrouped.map(group => (
+                  <div key={group.type?.id || 'unknown'}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {group.type?.name || 'Sem tipo'}
+                      </span>
+                      <Separator className="flex-1" />
+                    </div>
+                    <div className="space-y-1">{group.items.map(renderItem)}</div>
                   </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
 
             <div className="mt-3 flex justify-center">

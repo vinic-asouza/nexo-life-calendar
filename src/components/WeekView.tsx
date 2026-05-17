@@ -1,4 +1,4 @@
-import { CalendarItem, Area, ItemType, FilterState } from '@/types';
+import { CalendarItem, FilterState, GroupingMode } from '@/types';
 import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import { format, startOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -8,52 +8,59 @@ import { useState, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCalendarData } from '@/context/CalendarDataContext';
+import { formatItemTime, groupItemsByType, sortItemsChronologically } from '@/lib/itemSort';
 
 interface WeekViewProps {
   date: Date;
   filters: FilterState;
+  grouping: GroupingMode;
   onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
-export function WeekView({ date, filters, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
+export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
   const { items, areas, types } = useCalendarData();
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 
   const columns = useMemo(() => {
     const cols = [];
-    for (let i = 0; i < 5; i++) {
-      cols.push({ days: [addDays(weekStart, i)] });
-    }
+    for (let i = 0; i < 5; i++) cols.push({ days: [addDays(weekStart, i)] });
     cols.push({ days: [addDays(weekStart, 5), addDays(weekStart, 6)] });
     return cols;
   }, [weekStart.getTime()]);
 
-  const groupByType = (dayItems: CalendarItem[]) => {
-    const groups: { typeId: string; typeName: string; items: CalendarItem[] }[] = [];
-    const map = new Map<string, CalendarItem[]>();
-    dayItems.forEach(item => {
-      const arr = map.get(item.typeId) || [];
-      arr.push(item);
-      map.set(item.typeId, arr);
-    });
-    types.forEach(t => {
-      const items = map.get(t.id);
-      if (items) {
-        items.sort((a, b) => {
-          const ai = areas.findIndex(ar => ar.id === a.areaId);
-          const bi = areas.findIndex(ar => ar.id === b.areaId);
-          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-        });
-        groups.push({ typeId: t.id, typeName: t.name, items });
-      }
-    });
-    map.forEach((items, typeId) => {
-      if (!types.find(t => t.id === typeId)) groups.push({ typeId, typeName: 'Sem tipo', items });
-    });
-    return groups;
+  const renderItem = (item: CalendarItem, dayStr: string) => {
+    const area = areas.find(a => a.id === item.areaId);
+    const isDone = isItemDoneOnDate(item, dayStr);
+    const time = formatItemTime(item);
+    return (
+      <div
+        key={item.id}
+        onClick={() => onItemClick(item, dayStr)}
+        className={cn(
+          'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
+          isDone && 'opacity-50'
+        )}
+        style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+        onMouseEnter={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`; }}
+        onMouseLeave={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`; }}
+      >
+        <div className="flex items-center gap-1">
+          {time && (
+            <span className="text-[10px] tabular-nums text-muted-foreground shrink-0">{time}</span>
+          )}
+          <span className="truncate font-medium flex-1">{item.title}</span>
+          {item.checklist && item.checklist.length > 0 && (
+            <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
+          )}
+          {item.comments && item.comments.length > 0 && (
+            <MessageSquare className="h-3 w-3 text-muted-foreground shrink-0" />
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -65,7 +72,9 @@ export function WeekView({ date, filters, onItemClick, onAddItem, onToggleStatus
               const dayItems = getItemsForDate(items, day, filters);
               const dayKey = colIdx * 10 + dayIdx;
               const today = isToday(day);
-              const grouped = groupByType(dayItems);
+              const dayStr = format(day, 'yyyy-MM-dd');
+              const grouped = grouping === 'type' ? groupItemsByType(dayItems, types, areas) : [];
+              const sorted = grouping === 'time' ? sortItemsChronologically(dayItems) : [];
 
               return (
                 <div
@@ -88,7 +97,7 @@ export function WeekView({ date, filters, onItemClick, onAddItem, onToggleStatus
                     </div>
                     {hoveredDay === dayKey && (
                       <button
-                        onClick={() => onAddItem(format(day, 'yyyy-MM-dd'))}
+                        onClick={() => onAddItem(dayStr)}
                         className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                       >
                         <Plus className="h-3 w-3" />
@@ -97,54 +106,27 @@ export function WeekView({ date, filters, onItemClick, onAddItem, onToggleStatus
                   </div>
 
                   <ScrollArea className="flex-1">
-                    <div className="space-y-4">
-                      {grouped.map(group => (
-                        <div key={group.typeId}>
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                              {group.typeName}
-                            </span>
-                            <Separator className="flex-1" />
+                    {grouping === 'type' ? (
+                      <div className="space-y-4">
+                        {grouped.map(group => (
+                          <div key={group.type?.id || 'unknown'}>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                                {group.type?.name || 'Sem tipo'}
+                              </span>
+                              <Separator className="flex-1" />
+                            </div>
+                            <div className="space-y-0.5">
+                              {group.items.map(item => renderItem(item, dayStr))}
+                            </div>
                           </div>
-                          <div className="space-y-0.5">
-                            {group.items.map(item => {
-                              const area = areas.find(a => a.id === item.areaId);
-                              const dayStr = format(day, 'yyyy-MM-dd');
-                              const isDone = isItemDoneOnDate(item, dayStr);
-                              return (
-                                <div
-                                  key={item.id}
-                                  onClick={() => onItemClick(item, dayStr)}
-                                  className={cn(
-                                    'cursor-pointer rounded-lg px-2 py-1.5 text-xs transition-colors',
-                                    isDone && 'opacity-50'
-                                  )}
-                                  style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                                  onMouseEnter={e => {
-                                    if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
-                                  }}
-                                  onMouseLeave={e => {
-                                    if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
-                                  }}
-                                >
-                                  <div className="flex items-center gap-1">
-                                    <span className={cn('truncate font-medium flex-1', isDone && 'line-through')}>
-                                      {item.title}
-                                    </span>
-                                    {item.checklist && item.checklist.length > 0 && (
-                                      <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
-                                    )}
-                                    {item.comments && item.comments.length > 0 && (
-                                      <MessageSquare className="h-3 w-3 text-muted-foreground shrink-0" />
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-0.5">
+                        {sorted.map(item => renderItem(item, dayStr))}
+                      </div>
+                    )}
                   </ScrollArea>
                 </div>
               );

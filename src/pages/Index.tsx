@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { CalendarItem, FilterState } from '@/types';
+import { CalendarItem, FilterState, GroupingMode } from '@/types';
 import { Header } from '@/components/Header';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DayView } from '@/components/DayView';
@@ -16,6 +16,13 @@ const Index = () => {
     const stored = window.localStorage.getItem('nexo_theme');
     return stored === 'light' ? 'light' : 'dark';
   });
+  const [grouping, setGrouping] = useState<GroupingMode>(() => {
+    if (typeof window === 'undefined') return 'type';
+    return (window.localStorage.getItem('nexo_grouping') as GroupingMode) === 'time' ? 'time' : 'type';
+  });
+  useEffect(() => {
+    window.localStorage.setItem('nexo_grouping', grouping);
+  }, [grouping]);
   const { items, addItem, updateItem, deleteItem, toggleStatus, areas, addArea, updateArea, deleteArea, reorderAreas, types, addType, updateType, deleteType, reorderTypes } = useCalendarData();
   const { currentDate, setCurrentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
   const isMobile = useIsMobile();
@@ -123,17 +130,19 @@ const Index = () => {
           onClose={() => setSidebarOpen(false)}
           isDarkMode={theme === 'dark'}
           onThemeToggle={handleThemeToggle}
+          grouping={grouping}
+          onGroupingChange={setGrouping}
         />
 
         <main className="flex-1 overflow-hidden flex flex-col">
           {viewMode === 'day' && (
-            <DayView date={currentDate} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
+            <DayView date={currentDate} filters={filters} grouping={grouping} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'week' && (
-            <WeekView date={currentDate} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
+            <WeekView date={currentDate} filters={filters} grouping={grouping} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'month' && (
-            <MonthView date={currentDate} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
+            <MonthView date={currentDate} filters={filters} grouping={grouping} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
         </main>
       </div>

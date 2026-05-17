@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
-import { Plus, X, Edit2, Trash2, Palette, Tag, User, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
-import { Area, ItemType, FilterState } from '@/types';
+import { Plus, X, Edit2, Trash2, Palette, Tag, User, ChevronDown, ChevronRight, GripVertical, LayoutList, Clock } from 'lucide-react';
+import { Area, ItemType, FilterState, GroupingMode } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,8 @@ interface AppSidebarProps {
   onClose: () => void;
   isDarkMode: boolean;
   onThemeToggle: (checked: boolean) => void;
+  grouping: GroupingMode;
+  onGroupingChange: (mode: GroupingMode) => void;
 }
 
 export function AppSidebar({
@@ -31,6 +33,7 @@ export function AppSidebar({
   onToggleAreaFilter, onToggleTypeFilter,
   open, collapsed, onClose,
   isDarkMode, onThemeToggle,
+  grouping, onGroupingChange,
 }: AppSidebarProps) {
   const { areas, types, addArea: onAddArea, updateArea: onUpdateArea, deleteArea: onDeleteArea, reorderAreas: onReorderAreas, addType: onAddType, updateType: onUpdateType, deleteType: onDeleteType, reorderTypes: onReorderTypes } = useCalendarData();
   const [areasOpen, setAreasOpen] = useState(true);
@@ -168,12 +171,41 @@ export function AppSidebar({
 
         {collapsed && (
           <div className="hidden md:flex flex-col items-center gap-3 pt-4">
+            {grouping === 'time' ? <Clock className="h-4 w-4 text-muted-foreground" /> : <LayoutList className="h-4 w-4 text-muted-foreground" />}
             <Palette className="h-4 w-4 text-muted-foreground" />
             <Tag className="h-4 w-4 text-muted-foreground" />
           </div>
         )}
 
         <div className={cn('flex-1 overflow-y-auto p-3 space-y-5', collapsed && 'hidden md:hidden')}>
+          {/* Grouping selector */}
+          <div>
+            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              <LayoutList className="h-3.5 w-3.5" />
+              Organização
+            </div>
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted/50 p-1">
+              <button
+                onClick={() => onGroupingChange('type')}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                  grouping === 'type' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Tag className="h-3 w-3" /> Tipo
+              </button>
+              <button
+                onClick={() => onGroupingChange('time')}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                  grouping === 'time' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Clock className="h-3 w-3" /> Horário
+              </button>
+            </div>
+          </div>
+
           {/* Areas Section */}
           <Collapsible open={areasOpen} onOpenChange={setAreasOpen}>
             <div className="flex items-center justify-between">
