@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
-import { Plus, X, Edit2, Trash2, Palette, Tag, User, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
-import { Area, ItemType, FilterState } from '@/types';
+import { Plus, X, Edit2, Trash2, Palette, Tag, User, ChevronDown, ChevronRight, GripVertical, LayoutList, Clock } from 'lucide-react';
+import { Area, ItemType, FilterState, GroupingMode } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,8 @@ interface AppSidebarProps {
   onClose: () => void;
   isDarkMode: boolean;
   onThemeToggle: (checked: boolean) => void;
+  grouping: GroupingMode;
+  onGroupingChange: (mode: GroupingMode) => void;
 }
 
 export function AppSidebar({
@@ -31,6 +33,7 @@ export function AppSidebar({
   onToggleAreaFilter, onToggleTypeFilter,
   open, collapsed, onClose,
   isDarkMode, onThemeToggle,
+  grouping, onGroupingChange,
 }: AppSidebarProps) {
   const { areas, types, addArea: onAddArea, updateArea: onUpdateArea, deleteArea: onDeleteArea, reorderAreas: onReorderAreas, addType: onAddType, updateType: onUpdateType, deleteType: onDeleteType, reorderTypes: onReorderTypes } = useCalendarData();
   const [areasOpen, setAreasOpen] = useState(true);
