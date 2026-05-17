@@ -7,6 +7,8 @@ type ItemRow = {
   title: string;
   start_date: string;
   end_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
   area_id: string | null;
   type_id: string | null;
   recurrence: Recurrence | null;

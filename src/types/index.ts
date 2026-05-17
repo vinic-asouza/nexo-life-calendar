@@ -29,11 +29,15 @@ export interface Comment {
   createdAt: string;
 }
 
+export type GroupingMode = 'type' | 'time';
+
 export interface CalendarItem {
   id: string;
   title: string;
   startDate: string;
   endDate?: string;
+  startTime?: string; // "HH:mm"
+  endTime?: string;   // "HH:mm"
   areaId: string;
   typeId: string;
   recurrence?: Recurrence;
