@@ -98,12 +98,13 @@ function DayCellDots({ dayItems, areas, types, dateStr, maxDots, grouping }: Day
 interface MonthViewProps {
   date: Date;
   filters: FilterState;
+  grouping: GroupingMode;
   onItemClick: (item: CalendarItem, occurrenceDate?: string) => void;
   onAddItem: (date: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
-export function MonthView({ date, filters, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
+export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onToggleStatus }: MonthViewProps) {
   const { items, areas, types } = useCalendarData();
   const [viewDayModal, setViewDayModal] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
