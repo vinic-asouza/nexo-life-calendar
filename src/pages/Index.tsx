@@ -130,17 +130,19 @@ const Index = () => {
           onClose={() => setSidebarOpen(false)}
           isDarkMode={theme === 'dark'}
           onThemeToggle={handleThemeToggle}
+          grouping={grouping}
+          onGroupingChange={setGrouping}
         />
 
         <main className="flex-1 overflow-hidden flex flex-col">
           {viewMode === 'day' && (
-            <DayView date={currentDate} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
+            <DayView date={currentDate} filters={filters} grouping={grouping} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'week' && (
-            <WeekView date={currentDate} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
+            <WeekView date={currentDate} filters={filters} grouping={grouping} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
           {viewMode === 'month' && (
-            <MonthView date={currentDate} filters={filters} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
+            <MonthView date={currentDate} filters={filters} grouping={grouping} onItemClick={handleItemClick} onAddItem={handleAddItem} onToggleStatus={toggleStatus} />
           )}
         </main>
       </div>
