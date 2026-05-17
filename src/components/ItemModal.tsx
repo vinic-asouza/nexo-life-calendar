@@ -369,11 +369,38 @@ export function ItemModal({
               className="text-lg font-medium placeholder:text-muted-foreground/50"
             />
 
+            <div>
+              <Label className="text-xs text-muted-foreground">Data</Label>
+              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground">Data</Label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
+                <Label className="text-xs text-muted-foreground">Hora início</Label>
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setStartTime(v);
+                    if (!v) setEndTime('');
+                  }}
+                  className="mt-1 h-9 text-sm"
+                />
               </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Hora fim</Label>
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={e => setEndTime(e.target.value)}
+                  disabled={!startTime}
+                  className="mt-1 h-9 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground">Área</Label>
                 <Select value={areaId} onValueChange={setAreaId}>
@@ -392,21 +419,21 @@ export function ItemModal({
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Tipo</Label>
+                <Select value={typeId} onValueChange={setTypeId}>
+                  <SelectTrigger className="mt-1 h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
+                    {types.map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
-              <Label className="text-xs text-muted-foreground">Tipo</Label>
-              <Select value={typeId} onValueChange={setTypeId}>
-                <SelectTrigger className="mt-1 h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50">
-                  {types.map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             {/* Progressive disclosure */}
             {!showMore ? (
