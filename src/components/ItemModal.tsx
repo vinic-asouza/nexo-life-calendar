@@ -252,6 +252,13 @@ export function ItemModal({
 
             <p className="text-sm text-muted-foreground">{format(parseLocalDate(item.startDate), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(parseLocalDate(item.endDate), 'dd/MM/yyyy')}` : ''}</p>
 
+            {item.startTime && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                {item.endTime ? `${item.startTime} – ${item.endTime}` : item.startTime}
+              </p>
+            )}
+
             {item.recurrence && (
               <p className="text-sm text-muted-foreground">🔄 {RECURRENCE_LABELS[item.recurrence.type]}</p>
             )}
