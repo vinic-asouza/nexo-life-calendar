@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { CalendarItem, FilterState } from '@/types';
+import { CalendarItem, FilterState, GroupingMode } from '@/types';
 import { Header } from '@/components/Header';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DayView } from '@/components/DayView';
@@ -16,6 +16,13 @@ const Index = () => {
     const stored = window.localStorage.getItem('nexo_theme');
     return stored === 'light' ? 'light' : 'dark';
   });
+  const [grouping, setGrouping] = useState<GroupingMode>(() => {
+    if (typeof window === 'undefined') return 'type';
+    return (window.localStorage.getItem('nexo_grouping') as GroupingMode) === 'time' ? 'time' : 'type';
+  });
+  useEffect(() => {
+    window.localStorage.setItem('nexo_grouping', grouping);
+  }, [grouping]);
   const { items, addItem, updateItem, deleteItem, toggleStatus, areas, addArea, updateArea, deleteArea, reorderAreas, types, addType, updateType, deleteType, reorderTypes } = useCalendarData();
   const { currentDate, setCurrentDate, viewMode, setViewMode, goNext, goPrev, goToday } = useCalendarNavigation();
   const isMobile = useIsMobile();
