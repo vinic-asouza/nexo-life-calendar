@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { CalendarItem, Area, ItemType, FilterState } from '@/types';
+import { CalendarItem, Area, ItemType, FilterState, GroupingMode } from '@/types';
 import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { useCalendarData } from '@/context/CalendarDataContext';
+import { formatItemTime, groupItemsByType, sortItemsChronologically, compareByTime } from '@/lib/itemSort';
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -24,12 +25,24 @@ interface DayCellDotsProps {
   types: ItemType[];
   dateStr: string;
   maxDots: number;
+  grouping: GroupingMode;
 }
 
-function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsProps) {
-
-  // Flatten all items sorted by area then type
+function DayCellDots({ dayItems, areas, types, dateStr, maxDots, grouping }: DayCellDotsProps) {
   const allDots = useMemo(() => {
+    if (grouping === 'time') {
+      const sorted = sortItemsChronologically(dayItems);
+      return sorted.map(item => {
+        const area = areas.find(a => a.id === item.areaId);
+        const done = isItemDoneOnDate(item, dateStr);
+        return {
+          id: item.id,
+          color: area
+            ? `hsl(${area.color} / ${done ? 0.3 : 0.8})`
+            : `hsl(var(--muted-foreground) / ${done ? 0.2 : 0.5})`,
+        };
+      });
+    }
     const areaGroups = new Map<string, { area: Area | undefined; items: CalendarItem[] }>();
     dayItems.forEach(item => {
       const group = areaGroups.get(item.areaId);
@@ -57,7 +70,7 @@ function DayCellDots({ dayItems, areas, types, dateStr, maxDots }: DayCellDotsPr
         };
       });
     });
-  }, [dayItems, areas, types, dateStr]);
+  }, [dayItems, areas, types, dateStr, grouping]);
 
   const hasOverflow = allDots.length > maxDots;
   const visibleCount = hasOverflow ? maxDots - 1 : allDots.length;
