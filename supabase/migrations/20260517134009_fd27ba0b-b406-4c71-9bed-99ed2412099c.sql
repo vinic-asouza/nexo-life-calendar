@@ -1,0 +1,1 @@
+ALTER TABLE public.items ADD COLUMN start_time time NULL, ADD COLUMN end_time time NULL;
