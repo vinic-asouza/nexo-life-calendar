@@ -217,7 +217,7 @@ export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onT
                 )}
               </div>
 
-              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} maxDots={maxDots} />
+              <DayCellDots dayItems={dayItems} areas={areas} types={types} dateStr={key} maxDots={maxDots} grouping={grouping} />
             </div>
           );
         })}
