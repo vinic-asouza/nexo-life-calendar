@@ -241,70 +241,70 @@ export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onT
             </div>
 
             <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-              {viewDayGrouped.length === 0 && (
+              {viewDayItems.length === 0 && (
                 <p className="text-sm text-muted-foreground py-4 text-center">Nenhum item neste dia</p>
               )}
-              {viewDayGrouped.map(group => (
-                <div key={group.type?.id || 'unknown'}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {group.type?.name || 'Sem tipo'}
-                    </span>
-                    <Separator className="flex-1" />
-                  </div>
-                  <div className="space-y-1">
-                    {group.items.map(item => {
-                      const area = areas.find(a => a.id === item.areaId);
-                      const isDone = isItemDoneOnDate(item, viewDayModal);
-                      return (
-                        <div
-                          key={item.id}
-                          onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
-                          className={cn(
-                            'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
-                            isDone && 'opacity-60'
-                          )}
-                          style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                          onMouseEnter={e => {
-                            if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`;
-                          }}
-                          onMouseLeave={e => {
-                            if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`;
-                          }}
-                        >
-                          <CheckIndicator
-                            size="md"
-                            done={isDone}
-                            color={area?.color}
-                            onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
-                          />
 
-                          <div className="flex-1 min-w-0">
-                            <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>
-                              {item.title}
-                            </p>
-                          </div>
+              {(() => {
+                const renderItem = (item: CalendarItem) => {
+                  const area = areas.find(a => a.id === item.areaId);
+                  const isDone = isItemDoneOnDate(item, viewDayModal);
+                  const time = formatItemTime(item);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
+                      className={cn(
+                        'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                        isDone && 'opacity-60'
+                      )}
+                      style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
+                      onMouseEnter={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`; }}
+                      onMouseLeave={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`; }}
+                    >
+                      <CheckIndicator
+                        size="md"
+                        done={isDone}
+                        color={area?.color}
+                        onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
+                      />
+                      <span className="text-xs tabular-nums text-muted-foreground w-20 shrink-0">{time ?? '—'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>{item.title}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.checklist && item.checklist.length > 0 && (
+                          <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                        {item.comments && item.comments.length > 0 && (
+                          <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                        {area && (
+                          <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
+                            style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
+                            {area.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                };
 
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {item.checklist && item.checklist.length > 0 && (
-                              <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
-                            {item.comments && item.comments.length > 0 && (
-                              <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
-                            {area && (
-                              <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
-                                style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
-                                {area.name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                if (grouping === 'time') {
+                  return <div className="space-y-1">{viewDayTimeSorted.map(renderItem)}</div>;
+                }
+                return viewDayGrouped.map(group => (
+                  <div key={group.type?.id || 'unknown'}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {group.type?.name || 'Sem tipo'}
+                      </span>
+                      <Separator className="flex-1" />
+                    </div>
+                    <div className="space-y-1">{group.items.map(renderItem)}</div>
                   </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
 
             <div className="mt-3 flex justify-center">
