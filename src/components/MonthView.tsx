@@ -158,31 +158,14 @@ export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onT
 
   const viewDayItems = viewDayModal ? (itemsByDate.get(viewDayModal) ?? []) : [];
 
-  const viewDayGrouped = useMemo(() => {
-    if (!viewDayModal) return [];
-    const groups: { type: ItemType | undefined; items: CalendarItem[] }[] = [];
-    const typeMap = new Map<string, CalendarItem[]>();
-    viewDayItems.forEach(item => {
-      const existing = typeMap.get(item.typeId);
-      if (existing) existing.push(item);
-      else typeMap.set(item.typeId, [item]);
-    });
-    types.forEach(t => {
-      const items = typeMap.get(t.id);
-      if (items) {
-        items.sort((a, b) => {
-          const ai = areas.findIndex(ar => ar.id === a.areaId);
-          const bi = areas.findIndex(ar => ar.id === b.areaId);
-          return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-        });
-        groups.push({ type: t, items });
-      }
-    });
-    typeMap.forEach((items, typeId) => {
-      if (!types.find(t => t.id === typeId)) groups.push({ type: undefined, items });
-    });
-    return groups;
-  }, [viewDayItems, types, viewDayModal]);
+  const viewDayGrouped = useMemo(
+    () => viewDayModal && grouping === 'type' ? groupItemsByType(viewDayItems, types, areas) : [],
+    [viewDayItems, types, areas, viewDayModal, grouping]
+  );
+  const viewDayTimeSorted = useMemo(
+    () => viewDayModal && grouping === 'time' ? sortItemsChronologically(viewDayItems) : [],
+    [viewDayItems, viewDayModal, grouping]
+  );
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
