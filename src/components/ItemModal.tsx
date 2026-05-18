@@ -74,7 +74,7 @@ export function ItemModal({
       setStartDate(item.startDate.split('T')[0]);
       setEndDate(item.endDate?.split('T')[0] || '');
       setStartTime(item.startTime || '');
-      setEndTime(item.endTime || '');
+      
       setAreaId(item.areaId);
       setTypeId(item.typeId);
       setRecurrenceType(item.recurrence?.type || '');
