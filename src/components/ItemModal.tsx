@@ -1,19 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock } from 'lucide-react';
+import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock, CalendarIcon } from 'lucide-react';
 import { CalendarItem, Area, ItemType, RecurrenceType, ChecklistItem, Comment } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { useCalendarData } from '@/context/CalendarDataContext';
 
 // Parse YYYY-MM-DD as local-time midnight (avoids UTC offset shift).
 const parseLocalDate = (dateStr: string) => parseISO(dateStr.length === 10 ? `${dateStr}T00:00:00` : dateStr);
 import { Separator } from '@/components/ui/separator';
 import { CheckIndicator } from '@/components/ui/check-indicator';
+
+// Generate time options in 15-minute increments
+const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
+  const h = Math.floor(i / 4).toString().padStart(2, '0');
+  const m = ((i % 4) * 15).toString().padStart(2, '0');
+  return `${h}:${m}`;
+});
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
