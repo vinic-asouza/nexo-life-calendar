@@ -255,7 +255,7 @@ export function ItemModal({
             {item.startTime && (
               <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
-                {item.endTime ? `${item.startTime} – ${item.endTime}` : item.startTime}
+                {item.startTime}
               </p>
             )}
 
