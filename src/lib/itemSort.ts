@@ -2,7 +2,6 @@ import { CalendarItem, ItemType, Area } from '@/types';
 
 export function formatItemTime(item: CalendarItem): string | null {
   if (!item.startTime) return null;
-  if (item.endTime) return `${item.startTime}–${item.endTime}`;
   return item.startTime;
 }
 
