@@ -123,7 +123,7 @@ export function ItemModal({
       startDate,
       endDate: endDate || undefined,
       startTime: startTime || undefined,
-      endTime: startTime && endTime ? endTime : undefined,
+      endTime: undefined,
       areaId,
       typeId,
       recurrence: recurrenceType
