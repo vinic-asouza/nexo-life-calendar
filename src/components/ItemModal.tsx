@@ -409,11 +409,9 @@ export function ItemModal({
               <div>
                 <Label className="text-xs text-muted-foreground">Hora</Label>
                 <Select value={startTime || '__none__'} onValueChange={v => setStartTime(v === '__none__' ? '' : v)}>
-                  <SelectTrigger className="mt-1 h-9 text-sm">
-                    <span className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 opacity-60" />
-                      <SelectValue placeholder="Selecionar" />
-                    </span>
+                  <SelectTrigger className="mt-1 h-9 text-sm [&>span]:flex [&>span]:items-center [&>span]:gap-2">
+                    <Clock className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                    <SelectValue placeholder="Selecionar" />
                   </SelectTrigger>
                   <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50 max-h-60">
                     <SelectItem value="__none__">Sem horário</SelectItem>
