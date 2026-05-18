@@ -49,7 +49,6 @@ export function ItemModal({
   const [startDate, setStartDate] = useState(initialDate || format(new Date(), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState('');
   const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
   const [areaId, setAreaId] = useState(areas[0]?.id || '');
   const [typeId, setTypeId] = useState(types[0]?.id || '');
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType | ''>('');
@@ -75,7 +74,7 @@ export function ItemModal({
       setStartDate(item.startDate.split('T')[0]);
       setEndDate(item.endDate?.split('T')[0] || '');
       setStartTime(item.startTime || '');
-      setEndTime(item.endTime || '');
+      
       setAreaId(item.areaId);
       setTypeId(item.typeId);
       setRecurrenceType(item.recurrence?.type || '');
@@ -89,7 +88,6 @@ export function ItemModal({
       setStartDate(initialDate || format(new Date(), 'yyyy-MM-dd'));
       setEndDate('');
       setStartTime('');
-      setEndTime('');
       setAreaId(areas[0]?.id || '');
       setTypeId(types[0]?.id || '');
       setRecurrenceType('');
@@ -125,7 +123,7 @@ export function ItemModal({
       startDate,
       endDate: endDate || undefined,
       startTime: startTime || undefined,
-      endTime: startTime && endTime ? endTime : undefined,
+      endTime: undefined,
       areaId,
       typeId,
       recurrence: recurrenceType
@@ -255,7 +253,7 @@ export function ItemModal({
             {item.startTime && (
               <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
-                {item.endTime ? `${item.startTime} – ${item.endTime}` : item.startTime}
+                {item.startTime}
               </p>
             )}
 
@@ -369,32 +367,17 @@ export function ItemModal({
               className="text-lg font-medium placeholder:text-muted-foreground/50"
             />
 
-            <div>
-              <Label className="text-xs text-muted-foreground">Data</Label>
-              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
-            </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground">Hora início</Label>
+                <Label className="text-xs text-muted-foreground">Data</Label>
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Hora</Label>
                 <Input
                   type="time"
                   value={startTime}
-                  onChange={e => {
-                    const v = e.target.value;
-                    setStartTime(v);
-                    if (!v) setEndTime('');
-                  }}
-                  className="mt-1 h-9 text-sm"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Hora fim</Label>
-                <Input
-                  type="time"
-                  value={endTime}
-                  onChange={e => setEndTime(e.target.value)}
-                  disabled={!startTime}
+                  onChange={e => setStartTime(e.target.value)}
                   className="mt-1 h-9 text-sm"
                 />
               </div>
