@@ -469,7 +469,41 @@ export function ItemModal({
               <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
                 <div>
                   <Label className="text-xs text-muted-foreground">Data final (opcional)</Label>
-                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="mt-1 h-9 text-sm" />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'mt-1 h-9 w-full justify-start px-3 text-sm font-normal',
+                          !endDate && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-3.5 w-3.5 opacity-60" />
+                        {endDate ? format(parseLocalDate(endDate), "dd 'de' MMM, yyyy", { locale: ptBR }) : 'Selecionar'}
+                        {endDate && (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={e => { e.stopPropagation(); setEndDate(''); }}
+                            className="ml-auto text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={endDate ? parseLocalDate(endDate) : undefined}
+                        onSelect={d => d && setEndDate(format(d, 'yyyy-MM-dd'))}
+                        initialFocus
+                        locale={ptBR}
+                        className={cn('p-3 pointer-events-auto')}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div>
