@@ -88,7 +88,6 @@ export function ItemModal({
       setStartDate(initialDate || format(new Date(), 'yyyy-MM-dd'));
       setEndDate('');
       setStartTime('');
-      setEndTime('');
       setAreaId(areas[0]?.id || '');
       setTypeId(types[0]?.id || '');
       setRecurrenceType('');
