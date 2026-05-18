@@ -1,19 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock } from 'lucide-react';
+import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock, CalendarIcon } from 'lucide-react';
 import { CalendarItem, Area, ItemType, RecurrenceType, ChecklistItem, Comment } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { useCalendarData } from '@/context/CalendarDataContext';
 
 // Parse YYYY-MM-DD as local-time midnight (avoids UTC offset shift).
 const parseLocalDate = (dateStr: string) => parseISO(dateStr.length === 10 ? `${dateStr}T00:00:00` : dateStr);
 import { Separator } from '@/components/ui/separator';
 import { CheckIndicator } from '@/components/ui/check-indicator';
+
+// Generate time options in 15-minute increments
+const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
+  const h = Math.floor(i / 4).toString().padStart(2, '0');
+  const m = ((i % 4) * 15).toString().padStart(2, '0');
+  return `${h}:${m}`;
+});
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -370,16 +380,48 @@ export function ItemModal({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground">Data</Label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 h-9 text-sm" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        'mt-1 h-9 w-full justify-start px-3 text-sm font-normal',
+                        !startDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-3.5 w-3.5 opacity-60" />
+                      {startDate ? format(parseLocalDate(startDate), "dd 'de' MMM, yyyy", { locale: ptBR }) : 'Selecionar'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate ? parseLocalDate(startDate) : undefined}
+                      onSelect={d => d && setStartDate(format(d, 'yyyy-MM-dd'))}
+                      initialFocus
+                      locale={ptBR}
+                      className={cn('p-3 pointer-events-auto')}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Hora</Label>
-                <Input
-                  type="time"
-                  value={startTime}
-                  onChange={e => setStartTime(e.target.value)}
-                  className="mt-1 h-9 text-sm"
-                />
+                <Select value={startTime || '__none__'} onValueChange={v => setStartTime(v === '__none__' ? '' : v)}>
+                  <SelectTrigger className="mt-1 h-9 text-sm">
+                    <span className="flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5 opacity-60" />
+                      <SelectValue placeholder="Selecionar" />
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent className="bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50 max-h-60">
+                    <SelectItem value="__none__">Sem horário</SelectItem>
+                    {TIME_OPTIONS.map(t => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -427,7 +469,41 @@ export function ItemModal({
               <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
                 <div>
                   <Label className="text-xs text-muted-foreground">Data final (opcional)</Label>
-                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="mt-1 h-9 text-sm" />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'mt-1 h-9 w-full justify-start px-3 text-sm font-normal',
+                          !endDate && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-3.5 w-3.5 opacity-60" />
+                        {endDate ? format(parseLocalDate(endDate), "dd 'de' MMM, yyyy", { locale: ptBR }) : 'Selecionar'}
+                        {endDate && (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={e => { e.stopPropagation(); setEndDate(''); }}
+                            className="ml-auto text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-card/80 backdrop-blur-xl backdrop-saturate-150 border-border/50" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={endDate ? parseLocalDate(endDate) : undefined}
+                        onSelect={d => d && setEndDate(format(d, 'yyyy-MM-dd'))}
+                        initialFocus
+                        locale={ptBR}
+                        className={cn('p-3 pointer-events-auto')}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div>
