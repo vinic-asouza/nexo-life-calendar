@@ -49,7 +49,6 @@ export function ItemModal({
   const [startDate, setStartDate] = useState(initialDate || format(new Date(), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState('');
   const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
   const [areaId, setAreaId] = useState(areas[0]?.id || '');
   const [typeId, setTypeId] = useState(types[0]?.id || '');
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType | ''>('');
