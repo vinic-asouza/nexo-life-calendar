@@ -279,8 +279,15 @@ export function ItemModal({
             </div>
 
             {item.notes && (
-              <div className="rounded-lg bg-muted/50 p-3">
-                <p className="text-sm text-muted-foreground">{item.notes}</p>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Observações</span>
+                  <Separator className="flex-1" />
+                </div>
+                <div className="rounded-lg bg-muted/50 p-3">
+                  <p className="text-sm text-muted-foreground">{item.notes}</p>
+                </div>
               </div>
             )}
 
