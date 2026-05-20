@@ -154,6 +154,7 @@ const Index = () => {
         occurrenceDate={occurrenceDate}
         item={selectedItem}
         mode={modalMode}
+        calendarViewMode={viewMode}
         onSave={addItem}
         onUpdate={updateItem}
         onDelete={deleteItem}
