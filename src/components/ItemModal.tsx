@@ -217,11 +217,11 @@ export function ItemModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={onClose}>
       <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-6 shadow-xl sm:rounded-lg animate-in slide-in-from-bottom-4 duration-300"
+        className="relative z-10 w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 px-6 pb-6 pt-4 shadow-xl sm:rounded-lg animate-in slide-in-from-bottom-4 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
             {mode === 'create' ? 'Novo Item' : mode === 'edit' ? 'Editar Item' : ''}
           </h2>
