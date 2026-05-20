@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock, CalendarIcon, Repeat } from 'lucide-react';
+import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock, CalendarIcon, Repeat, FileText } from 'lucide-react';
 import { CalendarItem, Area, ItemType, RecurrenceType, ChecklistItem, Comment } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
