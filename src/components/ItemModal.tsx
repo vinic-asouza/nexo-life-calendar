@@ -51,6 +51,7 @@ interface ItemModalProps {
 
 export function ItemModal({
   open, onClose, initialDate, occurrenceDate, item, mode: initialMode,
+  calendarViewMode,
   onSave, onUpdate, onDelete, onToggleStatus,
 }: ItemModalProps) {
   const { areas, types } = useCalendarData();
