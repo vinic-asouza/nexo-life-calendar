@@ -42,6 +42,7 @@ interface ItemModalProps {
   occurrenceDate?: string;
   item?: CalendarItem | null;
   mode: 'create' | 'view' | 'edit';
+  calendarViewMode?: 'day' | 'week' | 'month';
   onSave: (item: Omit<CalendarItem, 'id' | 'createdAt'>) => void;
   onUpdate: (id: string, updates: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>) => void;
   onDelete: (id: string) => void;
