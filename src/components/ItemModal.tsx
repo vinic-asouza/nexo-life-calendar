@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock, CalendarIcon } from 'lucide-react';
+import { X, ChevronDown, Edit2, Trash2, ListChecks, MessageSquare, Plus, Check, Send, Clock, CalendarIcon, Repeat } from 'lucide-react';
 import { CalendarItem, Area, ItemType, RecurrenceType, ChecklistItem, Comment } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -223,28 +223,15 @@ export function ItemModal({
         {/* Header */}
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
-            {mode === 'create' ? 'Novo Item' : mode === 'view' ? 'Detalhes' : 'Editar Item'}
+            {mode === 'create' ? 'Novo Item' : mode === 'edit' ? 'Editar Item' : ''}
           </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors ml-auto">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {isView && item ? (
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <button
-                onClick={() => { onToggleStatus(item.id, occurrenceDate); setStatus(s => s === 'done' ? 'pending' : 'done'); }}
-                className={cn(
-                  'mt-1 h-5 w-5 rounded-full border-2 transition-colors flex-shrink-0 flex items-center justify-center',
-                  status === 'done' ? 'border-primary bg-primary' : 'border-muted-foreground'
-                )}
-              >
-                {status === 'done' && <span className="text-xs text-primary-foreground">✓</span>}
-              </button>
-              <h3 className="text-xl font-medium">{item.title}</h3>
-            </div>
-
             <div className="flex flex-wrap gap-2">
               {area && (
                 <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium" style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
@@ -258,18 +245,38 @@ export function ItemModal({
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground">{format(parseLocalDate(item.startDate), 'dd/MM/yyyy')}{item.endDate ? ` — ${format(parseLocalDate(item.endDate), 'dd/MM/yyyy')}` : ''}</p>
+            <div className="flex items-start gap-3">
+              <button
+                onClick={() => { onToggleStatus(item.id, occurrenceDate); setStatus(s => s === 'done' ? 'pending' : 'done'); }}
+                className={cn(
+                  'mt-1.5 h-5 w-5 rounded-full border-2 transition-colors flex-shrink-0 flex items-center justify-center',
+                  status === 'done' ? 'border-primary bg-primary' : 'border-muted-foreground'
+                )}
+              >
+                {status === 'done' && <Check className="h-3 w-3 text-primary-foreground" />}
+              </button>
+              <h3 className="text-xl font-medium">{item.title}</h3>
+            </div>
 
-            {item.startTime && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                {item.startTime}
-              </p>
-            )}
-
-            {item.recurrence && (
-              <p className="text-sm text-muted-foreground">🔄 {RECURRENCE_LABELS[item.recurrence.type]}</p>
-            )}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {format(parseLocalDate(item.startDate), 'dd/MM/yyyy')}
+                {item.endDate ? ` — ${format(parseLocalDate(item.endDate), 'dd/MM/yyyy')}` : ''}
+              </span>
+              {item.startTime && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" />
+                  {item.startTime}
+                </span>
+              )}
+              {item.recurrence && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Repeat className="h-3.5 w-3.5" />
+                  {RECURRENCE_LABELS[item.recurrence.type]}
+                </span>
+              )}
+            </div>
 
             {item.notes && (
               <div className="rounded-lg bg-muted/50 p-3">
