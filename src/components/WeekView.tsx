@@ -2,13 +2,14 @@ import { CalendarItem, FilterState, GroupingMode } from '@/types';
 import { getItemsForDate, isItemDoneOnDate } from '@/hooks/useItems';
 import { format, startOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, ListChecks, MessageSquare } from 'lucide-react';
+import { Plus, Eye, ListChecks, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCalendarData } from '@/context/CalendarDataContext';
 import { formatItemTime, groupItemsByType, sortItemsChronologically } from '@/lib/itemSort';
+import { DayDetailModal } from '@/components/DayDetailModal';
 
 interface WeekViewProps {
   date: Date;
