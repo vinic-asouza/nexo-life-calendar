@@ -5,14 +5,11 @@ import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   eachDayOfInterval, isSameMonth, isToday,
 } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Plus, Eye, X, ListChecks, MessageSquare } from 'lucide-react';
-import { CheckIndicator } from '@/components/ui/check-indicator';
-import { Button } from '@/components/ui/button';
+import { Plus, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 import { useCalendarData } from '@/context/CalendarDataContext';
-import { formatItemTime, groupItemsByType, sortItemsChronologically, compareByTime } from '@/lib/itemSort';
+import { sortItemsChronologically } from '@/lib/itemSort';
+import { DayDetailModal } from '@/components/DayDetailModal';
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
