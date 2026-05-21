@@ -154,6 +154,8 @@ export function DayView({ date, filters, grouping, onItemClick, onAddItem, onTog
           </div>
         </div>
       </ScrollArea>
+
+      <DayJournal date={dateStr} />
     </div>
   );
 }
