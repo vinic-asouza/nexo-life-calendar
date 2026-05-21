@@ -23,6 +23,7 @@ interface WeekViewProps {
 export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onToggleStatus }: WeekViewProps) {
   const { items, areas, types } = useCalendarData();
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
+  const [viewDayModal, setViewDayModal] = useState<string | null>(null);
   const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 
   const columns = useMemo(() => {
