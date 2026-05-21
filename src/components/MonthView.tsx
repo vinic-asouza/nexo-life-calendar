@@ -140,29 +140,12 @@ export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onT
 
   const itemsByDate = useMemo(() => {
     const cache = new Map<string, CalendarItem[]>();
-
     for (const day of days) {
       const dateStr = format(day, 'yyyy-MM-dd');
       cache.set(dateStr, getItemsForDate(items, day, filters));
     }
-
-    if (viewDayModal && !cache.has(viewDayModal)) {
-      cache.set(viewDayModal, getItemsForDate(items, parseLocalDate(viewDayModal), filters));
-    }
-
     return cache;
-  }, [days, items, filters, viewDayModal]);
-
-  const viewDayItems = viewDayModal ? (itemsByDate.get(viewDayModal) ?? []) : [];
-
-  const viewDayGrouped = useMemo(
-    () => viewDayModal && grouping === 'type' ? groupItemsByType(viewDayItems, types, areas) : [],
-    [viewDayItems, types, areas, viewDayModal, grouping]
-  );
-  const viewDayTimeSorted = useMemo(
-    () => viewDayModal && grouping === 'time' ? sortItemsChronologically(viewDayItems) : [],
-    [viewDayItems, viewDayModal, grouping]
-  );
+  }, [days, items, filters]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
