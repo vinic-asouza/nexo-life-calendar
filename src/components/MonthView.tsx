@@ -228,7 +228,7 @@ export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onT
         <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setViewDayModal(null)}>
           <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
           <div
-            className="relative z-10 w-full max-w-sm rounded-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+            className="relative z-10 w-full max-w-lg rounded-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
