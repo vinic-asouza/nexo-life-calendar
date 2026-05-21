@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useCalendarData } from '@/context/CalendarDataContext';
 import { formatItemTime, groupItemsByType, sortItemsChronologically } from '@/lib/itemSort';
+import { DayJournal } from '@/components/DayJournal';
 
 interface DayViewProps {
   date: Date;
