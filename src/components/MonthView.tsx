@@ -203,97 +203,16 @@ export function MonthView({ date, filters, grouping, onItemClick, onAddItem, onT
         })}
       </div>
 
-      {/* Day view modal */}
       {viewDayModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setViewDayModal(null)}>
-          <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
-          <div
-            className="relative z-10 w-full max-w-lg rounded-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-base capitalize" style={{ fontFamily: 'var(--font-display)' }}>
-                {format(parseLocalDate(viewDayModal), "EEEE, d 'de' MMMM", { locale: ptBR })}
-              </h3>
-              <button onClick={() => setViewDayModal(null)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-              {viewDayItems.length === 0 && (
-                <p className="text-sm text-muted-foreground py-4 text-center">Nenhum item neste dia</p>
-              )}
-
-              {(() => {
-                const renderItem = (item: CalendarItem) => {
-                  const area = areas.find(a => a.id === item.areaId);
-                  const isDone = isItemDoneOnDate(item, viewDayModal);
-                  const time = formatItemTime(item);
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => { setViewDayModal(null); onItemClick(item, viewDayModal); }}
-                      className={cn(
-                        'group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
-                        isDone && 'opacity-60'
-                      )}
-                      style={{ backgroundColor: area ? `hsl(${area.color} / 0.1)` : undefined }}
-                      onMouseEnter={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`; }}
-                      onMouseLeave={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`; }}
-                    >
-                      <CheckIndicator
-                        size="md"
-                        done={isDone}
-                        color={area?.color}
-                        onClick={e => { e.stopPropagation(); onToggleStatus(item.id, viewDayModal); }}
-                      />
-                      <span className="text-xs tabular-nums text-muted-foreground w-20 shrink-0">{time ?? '—'}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn('font-medium text-sm', isDone && 'text-muted-foreground')}>{item.title}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {item.checklist && item.checklist.length > 0 && (
-                          <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
-                        )}
-                        {item.comments && item.comments.length > 0 && (
-                          <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                        )}
-                        {area && (
-                          <span className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium"
-                            style={{ backgroundColor: `hsl(${area.color} / 0.15)`, color: `hsl(${area.color})` }}>
-                            {area.name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                };
-
-                if (grouping === 'time') {
-                  return <div className="space-y-1">{viewDayTimeSorted.map(renderItem)}</div>;
-                }
-                return viewDayGrouped.map(group => (
-                  <div key={group.type?.id || 'unknown'}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        {group.type?.name || 'Sem tipo'}
-                      </span>
-                      <Separator className="flex-1" />
-                    </div>
-                    <div className="space-y-1">{group.items.map(renderItem)}</div>
-                  </div>
-                ));
-              })()}
-            </div>
-
-            <div className="mt-3 flex justify-center">
-              <Button size="sm" className="gap-1.5" onClick={() => { setViewDayModal(null); onAddItem(viewDayModal); }}>
-                <Plus className="h-3.5 w-3.5" /> Adicionar item
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DayDetailModal
+          date={viewDayModal}
+          filters={filters}
+          grouping={grouping}
+          onClose={() => setViewDayModal(null)}
+          onItemClick={onItemClick}
+          onAddItem={onAddItem}
+          onToggleStatus={onToggleStatus}
+        />
       )}
     </div>
   );
