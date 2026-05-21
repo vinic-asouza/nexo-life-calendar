@@ -145,6 +145,18 @@ export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onTo
           </div>
         ))}
       </div>
+
+      {viewDayModal && (
+        <DayDetailModal
+          date={viewDayModal}
+          filters={filters}
+          grouping={grouping}
+          onClose={() => setViewDayModal(null)}
+          onItemClick={onItemClick}
+          onAddItem={onAddItem}
+          onToggleStatus={onToggleStatus}
+        />
+      )}
     </div>
   );
 }
