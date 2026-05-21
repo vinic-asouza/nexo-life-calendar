@@ -97,14 +97,23 @@ export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onTo
                         {format(day, 'd')}
                       </p>
                     </div>
-                    {hoveredDay === dayKey && (
+                    <div className="flex items-center gap-1">
                       <button
-                        onClick={() => onAddItem(dayStr)}
-                        className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                        onClick={() => setViewDayModal(dayStr)}
+                        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+                        aria-label="Ver detalhes do dia"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Eye className="h-3 w-3" />
                       </button>
-                    )}
+                      {hoveredDay === dayKey && (
+                        <button
+                          onClick={() => onAddItem(dayStr)}
+                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <ScrollArea className="flex-1">
