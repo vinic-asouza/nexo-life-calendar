@@ -61,9 +61,20 @@ export interface ItemsRepository {
   remove(id: string): Promise<void>;
 }
 
+export interface JournalEntry {
+  date: string; // YYYY-MM-DD
+  content: string;
+}
+
+export interface JournalRepository {
+  getByDate(date: string): Promise<JournalEntry | null>;
+  upsert(date: string, content: string): Promise<void>;
+}
+
 export interface Repositories {
   auth: AuthRepository;
   areas: AreasRepository;
   types: TypesRepository;
   items: ItemsRepository;
+  journal: JournalRepository;
 }
