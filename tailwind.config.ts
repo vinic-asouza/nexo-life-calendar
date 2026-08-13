@@ -82,11 +82,15 @@ export default {
   				DEFAULT: 'hsl(var(--accent))',
   				foreground: 'hsl(var(--accent-foreground))'
   			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			card: {
+    		popover: {
+    			DEFAULT: 'hsl(var(--popover))',
+    			foreground: 'hsl(var(--popover-foreground))'
+    		},
+    		overlay: {
+    			DEFAULT: 'hsl(var(--overlay))',
+    			foreground: 'hsl(var(--overlay-foreground))'
+    		},
+    		card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
