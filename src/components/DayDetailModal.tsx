@@ -114,7 +114,7 @@ export function DayDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm dark:bg-overlay/75" />
       <div
         className="relative z-10 w-full max-w-4xl rounded-lg bg-card/80 backdrop-blur-xl backdrop-saturate-150 border border-border/50 p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
