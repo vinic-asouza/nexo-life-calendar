@@ -1,0 +1,1 @@
+ALTER TABLE public.items ADD COLUMN IF NOT EXISTS excluded_dates text[] NOT NULL DEFAULT '{}'::text[];

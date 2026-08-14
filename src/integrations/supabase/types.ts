@@ -50,6 +50,7 @@ export type Database = {
           created_at: string
           end_date: string | null
           end_time: string | null
+          excluded_dates: string[]
           id: string
           notes: string | null
           recurrence: Json | null
@@ -68,6 +69,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           end_time?: string | null
+          excluded_dates?: string[]
           id?: string
           notes?: string | null
           recurrence?: Json | null
@@ -86,6 +88,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           end_time?: string | null
+          excluded_dates?: string[]
           id?: string
           notes?: string | null
           recurrence?: Json | null
