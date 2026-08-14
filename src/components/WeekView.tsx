@@ -50,9 +50,9 @@ export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onTo
         onMouseLeave={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`; }}
       >
         <div className="flex items-center gap-1">
-          {time && (
-            <span className="text-[10px] tabular-nums text-muted-foreground shrink-0">{time}</span>
-          )}
+          <span className="text-[10px] tabular-nums text-muted-foreground shrink-0 w-10 inline-block text-right">
+            {time ?? ''}
+          </span>
           <span className="truncate font-medium flex-1">{item.title}</span>
           {item.checklist && item.checklist.length > 0 && (
             <ListChecks className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -91,8 +91,8 @@ export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onTo
                         {format(day, 'EEE', { locale: ptBR })}
                       </p>
                       <p className={cn(
-                        'text-lg font-semibold',
-                        today && 'flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm'
+                        'flex h-8 w-8 items-center justify-center text-lg font-semibold',
+                        today && 'rounded-lg bg-primary text-primary-foreground text-sm'
                       )}>
                         {format(day, 'd')}
                       </p>
