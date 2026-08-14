@@ -17,6 +17,10 @@ import { useCalendarData } from '@/context/CalendarDataContext';
 const parseLocalDate = (dateStr: string) => parseISO(dateStr.length === 10 ? `${dateStr}T00:00:00` : dateStr);
 import { Separator } from '@/components/ui/separator';
 import { CheckIndicator } from '@/components/ui/check-indicator';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Generate time options in 15-minute increments
 const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
@@ -45,7 +49,7 @@ interface ItemModalProps {
   calendarViewMode?: 'day' | 'week' | 'month';
   onSave: (item: Omit<CalendarItem, 'id' | 'createdAt'>) => void;
   onUpdate: (id: string, updates: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, occurrenceDate?: string) => void;
   onToggleStatus: (id: string, occurrenceDate?: string) => void;
 }
 
@@ -56,6 +60,7 @@ export function ItemModal({
 }: ItemModalProps) {
   const { areas, types } = useCalendarData();
   const [mode, setMode] = useState(initialMode);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [status, setStatus] = useState<'pending' | 'done'>(item?.status || 'pending');
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(initialDate || format(new Date(), 'yyyy-MM-dd'));
@@ -379,10 +384,44 @@ export function ItemModal({
                 <Edit2 className="h-3 w-3" />
                 Editar
               </Button>
-              <Button size="sm" onClick={() => { onDelete(item.id); onClose(); }} className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (item.recurrence && occurrenceDate) { setDeleteOpen(true); return; }
+                  onDelete(item.id);
+                  onClose();
+                }}
+                className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 <Trash2 className="h-3 w-3" />
                 Excluir
               </Button>
+
+              <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir item recorrente</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Este item se repete em vários dias. O que você quer fazer?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="sm:justify-end gap-2">
+                    <AlertDialogCancel className="text-xs">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="text-xs"
+                      onClick={() => { onDelete(item.id, occurrenceDate); setDeleteOpen(false); onClose(); }}
+                    >
+                      Apenas este dia
+                    </AlertDialogAction>
+                    <AlertDialogAction
+                      className="text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={() => { onDelete(item.id); setDeleteOpen(false); onClose(); }}
+                    >
+                      Todos os dias
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         ) : (
