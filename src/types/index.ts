@@ -44,6 +44,7 @@ export interface CalendarItem {
   notes?: string;
   status: 'pending' | 'done';
   completedDates?: string[]; // YYYY-MM-DD list of completed occurrences (for recurring items)
+  excludedDates?: string[]; // YYYY-MM-DD list of occurrences removed from a recurring item
   checklist?: ChecklistItem[];
   comments?: Comment[];
   createdAt: string;

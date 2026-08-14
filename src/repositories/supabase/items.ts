@@ -15,6 +15,7 @@ type ItemRow = {
   notes: string | null;
   status: 'pending' | 'done';
   completed_dates: string[] | null;
+  excluded_dates: string[] | null;
   checklist: ChecklistItem[] | null;
   comments: Comment[] | null;
   created_at: string;
@@ -33,6 +34,7 @@ const toDomain = (r: ItemRow): CalendarItem => ({
   notes: r.notes ?? undefined,
   status: r.status,
   completedDates: r.completed_dates ?? undefined,
+  excludedDates: r.excluded_dates ?? undefined,
   checklist: r.checklist ?? undefined,
   comments: r.comments ?? undefined,
   createdAt: r.created_at,
@@ -50,6 +52,7 @@ type RowPatch = {
   notes?: string | null;
   status?: 'pending' | 'done';
   completed_dates?: string[];
+  excluded_dates?: string[];
   checklist?: ChecklistItem[];
   comments?: Comment[];
 };
@@ -67,6 +70,7 @@ const toRow = (item: Partial<Omit<CalendarItem, 'id' | 'createdAt'>>): RowPatch 
   if ('notes' in item) row.notes = item.notes ?? null;
   if (item.status !== undefined) row.status = item.status;
   if (item.completedDates !== undefined) row.completed_dates = item.completedDates;
+  if (item.excludedDates !== undefined) row.excluded_dates = item.excludedDates;
   if (item.checklist !== undefined) row.checklist = item.checklist;
   if (item.comments !== undefined) row.comments = item.comments;
   return row;
@@ -78,7 +82,7 @@ async function getUserId(): Promise<string> {
   return data.user.id;
 }
 
-const SELECT = 'id, title, start_date, end_date, start_time, end_time, area_id, type_id, recurrence, notes, status, completed_dates, checklist, comments, created_at';
+const SELECT = 'id, title, start_date, end_date, start_time, end_time, area_id, type_id, recurrence, notes, status, completed_dates, excluded_dates, checklist, comments, created_at';
 
 export const supabaseItems: ItemsRepository = {
   async list() {
