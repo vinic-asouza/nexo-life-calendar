@@ -49,8 +49,8 @@ export function WeekView({ date, filters, grouping, onItemClick, onAddItem, onTo
         onMouseEnter={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.25)`; }}
         onMouseLeave={e => { if (area) (e.currentTarget as HTMLElement).style.backgroundColor = `hsl(${area.color} / 0.1)`; }}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] tabular-nums text-muted-foreground shrink-0 w-12 inline-block text-left">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] tabular-nums text-muted-foreground shrink-0 w-10 inline-block text-left">
             {time ?? ''}
           </span>
           <span className="truncate font-medium flex-1">{item.title}</span>
