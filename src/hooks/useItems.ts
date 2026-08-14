@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { CalendarItem, FilterState } from '@/types';
 import { repositories } from '@/repositories';
 import { useAuth } from '@/context/AuthContext';
-import { parseISO, startOfDay, getDay } from 'date-fns';
+import { parseISO, startOfDay, getDay, format } from 'date-fns';
 
 const QK = ['items'] as const;
 
@@ -67,7 +67,27 @@ export function useItems() {
       updateMutation.mutateAsync({ id, updates }),
     [updateMutation],
   );
-  const deleteItem = useCallback((id: string) => deleteMutation.mutateAsync(id), [deleteMutation]);
+  const deleteItem = useCallback(
+    (id: string, occurrenceDate?: string) => {
+      if (occurrenceDate) {
+        const current = qc.getQueryData<CalendarItem[]>([...QK, user?.id]) ?? [];
+        const item = current.find((i) => i.id === id);
+        if (item?.recurrence) {
+          const excluded = item.excludedDates ?? [];
+          if (excluded.includes(occurrenceDate)) return Promise.resolve();
+          return updateMutation.mutateAsync({
+            id,
+            updates: {
+              excludedDates: [...excluded, occurrenceDate],
+              completedDates: (item.completedDates ?? []).filter((d) => d !== occurrenceDate),
+            },
+          });
+        }
+      }
+      return deleteMutation.mutateAsync(id);
+    },
+    [deleteMutation, updateMutation, qc, user?.id],
+  );
 
   const toggleStatus = useCallback(
     (id: string, occurrenceDate?: string) => {
@@ -122,6 +142,8 @@ export function getItemsForDate(items: CalendarItem[], date: Date, filters: Filt
     if (!filters.typeIds.includes(item.typeId)) return false;
     const itemStart = startOfDay(parseISO(item.startDate));
     const itemEnd = item.endDate ? startOfDay(parseISO(item.endDate)) : itemStart;
+    const dateStr = format(target, 'yyyy-MM-dd');
+    if (item.excludedDates?.includes(dateStr)) return false;
     if (target >= itemStart && target <= itemEnd) return true;
     if (item.recurrence && recurringFallsOnDate(item, target)) return true;
     return false;
