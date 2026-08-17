@@ -1,73 +1,96 @@
-# Welcome to your Lovable project
+# NEXO — Life Calendar
 
-## Project info
+Calendário unificado (SPA) para organizar tarefas, eventos, hábitos e lembretes em uma única
+entidade ("Item"), com visualizações de Dia, Semana e Mês, filtros por Área/Tipo e diário diário.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Stack
 
-## How can I edit this code?
+- React 18 + TypeScript + Vite 5
+- Tailwind CSS 3 + shadcn/ui (Radix UI)
+- TanStack Query (cache e estado de servidor)
+- React Router 6
+- Supabase (auth, banco Postgres com RLS)
+- Vitest + Testing Library
 
-There are several ways of editing your application.
+## Pré-requisitos
 
-**Use Lovable**
+- Node.js 18+ (recomendado 20+)
+- npm, pnpm ou bun (o repositório versiona `bun.lock`; com npm o lockfile será recriado)
+- Um projeto Supabase (existente ou novo)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Instalação
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+git clone <URL_DO_REPOSITORIO>
+cd <PASTA_DO_PROJETO>
+bun install     # ou: npm install
 ```
 
-**Edit a file directly in GitHub**
+## Variáveis de ambiente
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Copie `.env.example` para `.env` e preencha:
 
-**Use GitHub Codespaces**
+| Variável                        | Descrição                                            |
+| ------------------------------- | ---------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | URL do projeto Supabase                              |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave anon/publishable (pública, protegida por RLS)  |
+| `VITE_SUPABASE_PROJECT_ID`      | ID do projeto (usado pela CLI do Supabase)           |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Sem essas variáveis o cliente Supabase inicializa com `undefined` e a aplicação não carrega dados.
+A `service_role key` e a senha do banco **não** devem existir no frontend.
 
-## What technologies are used for this project?
+## Banco de dados
 
-This project is built with:
+As migrações versionadas ficam em `supabase/migrations`. Para aplicar em um projeto novo:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```sh
+npx supabase link --project-ref <PROJECT_ID>
+npx supabase db push
+```
 
-## How can I deploy this project?
+Autenticação: e-mail/senha e Google OAuth. O provedor Google precisa ser configurado no painel do
+Supabase (Authentication → Providers), com as URLs de redirect apontando para a origem da aplicação
+(`http://localhost:8080` em desenvolvimento).
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Comandos
 
-## Can I connect a custom domain to my Lovable project?
+| Comando             | Descrição                                     |
+| ------------------- | --------------------------------------------- |
+| `bun run dev`       | Servidor de desenvolvimento em `:8080`        |
+| `bun run build`     | Build de produção em `dist/`                  |
+| `bun run build:dev` | Build com `mode=development`                  |
+| `bun run preview`   | Serve o build gerado                          |
+| `bun run lint`      | ESLint                                        |
+| `bun run test`      | Testes (Vitest, execução única)               |
+| `bun run test:watch`| Testes em modo watch                          |
 
-Yes, you can!
+## Estrutura
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```
+src/
+  components/        Componentes de domínio (calendário, modais, sidebar, header)
+    ui/              Primitivos shadcn/ui usados pelo app
+  context/           AuthContext (sessão) e CalendarDataContext (dados do calendário)
+  hooks/             Hooks de dados/UI (useItems, useCollection, useJournal, ...)
+  integrations/
+    supabase/        Cliente e tipos gerados (não editar manualmente)
+  lib/               Utilitários puros (ordenação/agrupamento de itens, cn)
+  pages/             Rotas (Index, Auth, ResetPassword, NotFound)
+  repositories/      Contratos de acesso a dados + implementação Supabase
+  types/             Tipos de domínio compartilhados
+supabase/migrations/ Migrações SQL
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+O acesso a dados é isolado em `src/repositories`: os hooks consomem apenas as interfaces em
+`src/repositories/types.ts`, e a implementação Supabase é selecionada em `src/repositories/index.ts`.
+
+## Observações sobre o ambiente Lovable
+
+O projeto foi iniciado na Lovable. Itens ainda relacionados a esse ambiente:
+
+- `lovable-tagger` (devDependency) é usado apenas em `vite.config.ts` no modo desenvolvimento para
+  marcar componentes no editor visual. Pode ser removido localmente sem impacto funcional
+  (remover o plugin do `vite.config.ts` junto).
+- `.lovable/` e `src/tailwind.config.lov.json` são metadados do editor; não afetam o build.
+- Os plugins `@lovable.dev/vite-plugin-*` são injetados pelo ambiente hospedado e não são
+  referenciados pelo `vite.config.ts` deste repositório.
